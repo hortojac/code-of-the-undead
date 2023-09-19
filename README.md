@@ -1,2 +1,8 @@
-# code-of-the-undead
-Repo for the game, Code of the Undead
+# Code of the Undead
+---
+### Authors
+* Seth Daniels
+* Nico Gatapia
+* Jacob Horton
+* Elijah Toliver
+* Gilbert Vandegrift
