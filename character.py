@@ -1,4 +1,5 @@
 import pygame
+from pygame import gfxdraw
 
 class Character:
     def __init__(self, screen):
@@ -9,6 +10,7 @@ class Character:
         self.y = self.screen.get_height() // 2  # Initial y-coordinate in the middle
 
     def draw(self):
-        pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.radius)
-
+        # pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.radius, 1)
+        gfxdraw.aacircle(self.screen, self.x, self.y, self.radius, self.color)
+        gfxdraw.filled_circle(self.screen, self.x, self.y, self.radius, self.color)
 
