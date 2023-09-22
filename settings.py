@@ -13,7 +13,7 @@ class Settings:
         
         self.FPS = 60 # Set the FPS
 
-        self.move_speed = 2 # Set the default movement speed
+        self.walk_speed = 2 # Set the default movement speed
         self.sprint_speed = 4 # Set the deafult sprint speed
 
         # Define deafult key bindings
