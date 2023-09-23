@@ -4,6 +4,7 @@ class Settings:
     def __init__(self):
         pygame.init()  # Initialize Pygame
         info = pygame.display.Info()  # Get monitor info
+        self.programIcon = pygame.image.load('assets/icon.png')
 
         # Set the screen width and height to the monitor's size
         self.screen_width = info.current_w
