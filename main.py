@@ -10,7 +10,10 @@ class Game:
     def __init__(self):
         # Initialize the game, and create resources.
         pygame.init()
+        # Create a Settings instance
         self.settings = Settings()
+        # Set the program icon
+        pygame.display.set_icon(self.settings.programIcon)
         # Set the screen size to the monitor's size
         self.screen = pygame.display.set_mode(
                 (self.settings.screen_width, self.settings.screen_height))
@@ -25,14 +28,14 @@ class Game:
     def run_game(self):
         # Start the main loop for the game.
         while True:
-            self._check_events()
-            self._update_character_position()
-            self._update_screen()
+            self.check_events()
+            self.update_character_position()
+            self.update_screen()
 
             # Control the frame rate
             self.clock.tick(self.settings.FPS)
 
-    def _check_events(self):
+    def check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -42,7 +45,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-    def _update_character_position(self):
+    def update_character_position(self):
         # Check for keys that are continuously pressed
         keys = pygame.key.get_pressed()
         if keys[self.settings.key_up]:
@@ -62,7 +65,7 @@ class Game:
             if keys[self.settings.key_sprint]:
                 self.character.x += self.settings.sprint_speed
 
-    def _update_screen(self):
+    def update_screen(self):
         # Set the screen background color
         self.screen.fill(self.settings.bg_color)
         # Draw the map
