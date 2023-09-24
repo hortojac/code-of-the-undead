@@ -7,30 +7,29 @@ class Character(pygame.sprite.Sprite):
     def __init__(self, pos, group):
         super().__init__(group)
         self.import_assets()
-
-        self.image = pygame.Surface((32, 64))
+        # Set the image and rect attributes for the character
+        self.image = pygame.Surface((32, 32))
         self.image.fill('green')
         self.rect = self.image.get_rect(center=pos)
 
-        # Movement
+        # Movement of the character
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
         self.speed = 200
 
     def import_assets(self):
         self.animations = {}
-
+        # Import all the animations
         for animation in self.animations.keys():
-            full_path = '../graphics/character/' + animation
+            full_path = "./assets/textures/character/" + animation
             self.animations[animation] = import_folder(full_path)
 
     def input(self):
         # Check for keys that are continuously pressed
         keys = pygame.key.get_pressed()
-        
         # Initialize direction vector
         self.direction = pygame.math.Vector2(0, 0)
-
+        # Set the direction vector based on the keys pressed
         if keys[KEY_LEFT]:
             if keys[KEY_SPRINT]:
                 self.direction.x = -2
@@ -41,7 +40,6 @@ class Character(pygame.sprite.Sprite):
                 self.direction.x = 2
             else:
                 self.direction.x = 1
-
         if keys[KEY_UP]:
             if keys[KEY_SPRINT]:
                 self.direction.y = -2
