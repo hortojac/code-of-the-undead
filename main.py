@@ -26,6 +26,7 @@ class Game:
         # Start the main loop for the game.
         while True:
             for event in pygame.event.get():
+                # Check for quit events
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
