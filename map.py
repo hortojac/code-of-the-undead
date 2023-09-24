@@ -1,25 +1,28 @@
 import pygame
+from settings import *
+from character import Character
 
 class Map:
-    def __init__(self, settings, screen):
-        self.settings = settings
-        self.screen = screen
+    def __init__(self):
         self.grid_size = 64 # Size of each tile in the tile map
         self.rows = 5  # Number of rows in the tile map
         self.columns = 5  # Number of columns in the tile map
+        self.display_surface = pygame.display.get_surface()
+        self.all_sprites = pygame.sprite.Group()
+        self.setup()
+
+    def setup(self):
+        self.character = Character((640, 360), self.all_sprites)
 
     def calculate_offset(self):
         # Calculate the offset of the tile map in the x and y direction
-        self.offset_x = (self.settings.screen_width - self.grid_size * self.columns) // 2
-        self.offset_y = (self.settings.screen_height - self.grid_size * self.rows) // 2
+        self.offset_x = (SCREEN_WIDTH - self.grid_size * self.columns) // 2
+        self.offset_y = (SCREEN_HEIGHT - self.grid_size * self.rows) // 2
 
-    def draw(self):
+    def run(self, dt):
         self.calculate_offset()
-        # Draw the tile map
-        for row in range(self.rows):
-            for col in range(self.columns):
-                x = self.offset_x + col * self.grid_size
-                y = self.offset_y + row * self.grid_size
-                pygame.draw.rect(self.screen, (0, 0, 0), (x, y, self.grid_size, self.grid_size), 1)
-
+        self.display_surface.fill((255, 255, 255))
+        self.all_sprites.draw(self.display_surface)
+        self.all_sprites.update(dt)
+        
 

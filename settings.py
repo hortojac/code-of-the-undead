@@ -1,26 +1,21 @@
 import pygame
 
-class Settings:
-    def __init__(self):
-        pygame.init()  # Initialize Pygame
-        info = pygame.display.Info()  # Get monitor info
-        self.programIcon = pygame.image.load('assets/icon.png')
+from pygame.math import Vector2
 
-        # Set the screen width and height to the monitor's size
-        self.screen_width = info.current_w
-        self.screen_height = info.current_h
+# Set the screen width and height to the monitor's size
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+TITLE_SIZE = 64
 
-        self.bg_color = (225, 225, 225) # Set the background color
-        
-        self.FPS = 60 # Set the FPS
+# Overlay size
+OVERLAY_POSITIONS = {
+    'tool': (40, SCREEN_HEIGHT - 15),
+    'seed': (70, SCREEN_HEIGHT - 5), }
 
-        self.walk_speed = 2 # Set the default movement speed
-        self.sprint_speed = 4 # Set the deafult sprint speed
+# Define deafult key bindings
+KEY_UP = pygame.K_w # Move up
+KEY_DOWN = pygame.K_s # Move down
+KEY_LEFT = pygame.K_a # Move left
+KEY_RIGHT = pygame.K_d # Move right
 
-        # Define deafult key bindings
-        self.key_up = pygame.K_w # Move up
-        self.key_down = pygame.K_s # Move down
-        self.key_left = pygame.K_a # Move left
-        self.key_right = pygame.K_d # Move right
-
-        self.key_sprint = pygame.K_LSHIFT # Sprint
+KEY_SPRINT = pygame.K_LSHIFT # Sprint
