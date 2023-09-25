@@ -3,6 +3,7 @@ import pygame
 
 from settings import *
 from map import Map
+from main_menu import MainMenu
 
 class Game:
     # Overall class to manage game assets and behavior.
@@ -19,6 +20,8 @@ class Game:
         pygame.display.set_caption("Code of the Undead")
         # Create a Clock instance
         self.clock = pygame.time.Clock()
+        # Create a Main Menu instance
+        self.main_menu = MainMenu()
         # Create a Map instance
         self.map = Map()
 
@@ -36,8 +39,10 @@ class Game:
                         sys.exit()
 
             dt = self.clock.tick() / 1000.0
+            # Draw the menu
+            self.main_menu.run()
             # Draw the map
-            self.map.run(dt)
+            # self.map.run(dt)
             # Make the most recently drawn screen visible
             pygame.display.update()
 
