@@ -19,7 +19,9 @@ class Character(pygame.sprite.Sprite):
         # Movement of the character
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
-        self.speed = 200
+        self.speed = 0 # Initialize speed to 0
+        self.walking_speed = 100  # Waling speed
+        self.sprinting_speed = 200  # Sprinting speed
 
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'right': [], 'left': [
@@ -40,31 +42,27 @@ class Character(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         # Initialize direction vector
         self.direction = pygame.math.Vector2(0, 0)
-        # Set the direction vector based on the keys pressed
+        # Check for sprinting (SHIFT key)
+        sprinting = keys[KEY_SPRINT]
+        # Set the direction vector and status based on the keys pressed
         if keys[KEY_LEFT]:
-            if keys[KEY_SPRINT]:
-                self.direction.x = -2
-            else:
-                self.direction.x = -1
-                self.status = 'left'
+            self.direction.x = -1
+            self.status = 'left'
         elif keys[KEY_RIGHT]:
-            if keys[KEY_SPRINT]:
-                self.direction.x = 2
-            else:
-                self.direction.x = 1
-                self.status = 'right'
+            self.direction.x = 1
+            self.status = 'right'
         if keys[KEY_UP]:
-            if keys[KEY_SPRINT]:
-                self.direction.y = -2
-            else:
-                self.direction.y = -1
-                self.status = 'up'
+            self.direction.y = -1
+            self.status = 'up'
         elif keys[KEY_DOWN]:
-            if keys[KEY_SPRINT]:
-                self.direction.y = 2
-            else:
-                self.direction.y = 1
-                self.status = 'down'
+            self.direction.y = 1
+            self.status = 'down'
+
+        # Adjust speed based on sprinting state
+        if sprinting:
+            self.speed = self.sprinting_speed
+        else:
+            self.speed = self.walking_speed
 
     def get_status(self):
         if self.direction.magnitude() == 0:
