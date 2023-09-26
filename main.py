@@ -5,6 +5,7 @@ from settings import *
 from map import Map
 from main_menu import MainMenu
 
+
 class Game:
     # Overall class to manage game assets and behavior.
     def __init__(self):
@@ -24,8 +25,8 @@ class Game:
         self.main_menu = MainMenu()
         # Create a Map instance
         self.map = Map()
-        #probably a better way to do this but for now
-        #0 means main menu 1 means play
+        # probably a better way to do this but for now
+        # 0 means main menu 1 means play
         self.game_state = 0
 
     def run_game(self):
@@ -51,7 +52,7 @@ class Game:
             # Make the most recently drawn screen visible
             pygame.display.update()
 
+
 if __name__ == '__main__':
     game = Game()
     game.run_game()
-

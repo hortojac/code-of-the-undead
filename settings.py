@@ -9,13 +9,13 @@ TITLE_SIZE = 64
 
 # Overlay size
 OVERLAY_POSITIONS = {
-    'tool': (40, SCREEN_HEIGHT - 15),
-    'seed': (70, SCREEN_HEIGHT - 5), }
+    'Ranged_Weapon': (40, SCREEN_HEIGHT - 15),
+    'Melee_Weapon': (70, SCREEN_HEIGHT - 5), }
 
 # Define deafult key bindings
-KEY_UP = pygame.K_w # Move up
-KEY_DOWN = pygame.K_s # Move down
-KEY_LEFT = pygame.K_a # Move left
-KEY_RIGHT = pygame.K_d # Move right
+KEY_UP = pygame.K_w  # Move up
+KEY_DOWN = pygame.K_s  # Move down
+KEY_LEFT = pygame.K_a  # Move left
+KEY_RIGHT = pygame.K_d  # Move right
 
-KEY_SPRINT = pygame.K_LSHIFT # Sprint
+KEY_SPRINT = pygame.K_LSHIFT  # Sprint
