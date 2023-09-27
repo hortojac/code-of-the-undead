@@ -65,16 +65,16 @@ class Character(pygame.sprite.Sprite):
 
         # Adjust speed based on sprinting state
         if sprinting:
-            self.speed = self.sprinting_speed
-            self.stamina -= self.stamina_degen_rate * dt # Reduce stamina
-            if self.stamina <= 0:
-                self.stamina = 0
-                self.speed = self.walking_speed
+            self.speed = self.sprinting_speed # Set speed to sprinting speed
+            self.stamina -= self.stamina_degen_rate * dt * 1.25 # Reduce stamina
+            if self.stamina <= 0: # Make sure stamina doesn't go below 0
+                self.stamina = 0 # Set stamina to 0 when it goes below 0
+                self.speed = self.walking_speed # Set speed to walking speed
         else:
-            self.speed = self.walking_speed
-            self.stamina += self.stamina_regen_rate * dt# Increase stamina
-            if self.stamina >= self.max_stamina:
-                self.stamina = self.max_stamina
+            self.speed = self.walking_speed # Set speed to walking speed
+            self.stamina += self.stamina_regen_rate * dt * 1.25 # Increase stamina
+            if self.stamina >= self.max_stamina: # Make sure stamina doesn't exceed the maximum value
+                self.stamina = self.max_stamina # Set stamina to the maximum value
 
     def get_status(self):
         if self.direction.magnitude() == 0:
