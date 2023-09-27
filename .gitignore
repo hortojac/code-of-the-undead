@@ -3,3 +3,6 @@
 
 # Ignore Python bytecode cache directories
 __pycache__/
+
+# Ignore vscode settings
+.vscode/
