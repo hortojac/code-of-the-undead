@@ -102,11 +102,15 @@ class Character(pygame.sprite.Sprite):
         # Calculate the current stamina bar width based on the current stamina value
         self.current_stamina_width = (self.stamina / self.max_stamina) * self.stamina_bar_width
 
-        # Draw the background of the stamina bar (gray)
-        pygame.draw.rect(display_surface, (128, 128, 128), (self.stamina_bar_x, self.stamina_bar_y, self.stamina_bar_width, self.stamina_bar_height))
+        font = pygame.font.SysFont('Arial', 20) # Font for the stamina text
+        text_surface = font.render('Stamina:', True, (0, 0, 0)) # Create the stamina text surface
+        display_surface.blit(text_surface, (self.stamina_bar_x, self.stamina_bar_y)) # Draws text above the stamina bar
+
+        # Draw the background of the stamina bar (gray), accounting for Stamina text size (20) and padding (10)
+        pygame.draw.rect(display_surface, (128, 128, 128), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.stamina_bar_width, self.stamina_bar_height))
         
-        # Draw the current stamina bar (green)
-        pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, self.stamina_bar_y, self.current_stamina_width, self.stamina_bar_height)) 
+        # Draw the current stamina bar (green), accounting for Stamina text size (20) and padding (10)
+        pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.current_stamina_width, self.stamina_bar_height)) 
 
     def update(self, dt):
         self.input(dt)
