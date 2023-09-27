@@ -43,6 +43,7 @@ class Map:
                 self.display_surface.blit(tile_image, (x, y))
 
         # Draw all sprites on top of the grid
+        self.character.draw_stamina_bar(self.display_surface)
         self.all_sprites.draw(self.display_surface)
         self.all_sprites.update(dt)
 

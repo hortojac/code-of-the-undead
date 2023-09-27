@@ -1,10 +1,8 @@
 import sys
 import pygame
-
 from settings import *
 from map import Map
 from main_menu import MainMenu
-
 
 class Game:
     # Overall class to manage game assets and behavior.

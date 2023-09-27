@@ -1,13 +1,12 @@
 import pygame
-
 from settings import *
 from support import *
-
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, pos, group):
         super().__init__(group)
 
+        # Call the import_assets method to import all the animations
         self.import_assets()
         self.status = 'down_idle'
         self.frame_index = 0
@@ -23,6 +22,12 @@ class Character(pygame.sprite.Sprite):
         self.walking_speed = 100  # Waling speed
         self.sprinting_speed = 200  # Sprinting speed
 
+        # Stamina variables
+        self.max_stamina = 100  # Initial maximum stamina value
+        self.stamina = self.max_stamina  # Current stamina value
+        self.stamina_regen_rate = 10  # Stamina regeneration rate per second
+        self.stamina_degen_rate = 20  # Stamina degeneration rate per second
+
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'right': [], 'left': [
         ], 'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': []}
@@ -37,7 +42,7 @@ class Character(pygame.sprite.Sprite):
             self.frame_index = 0
         self.image = self.animations[self.status][int(self.frame_index)]
 
-    def input(self):
+    def input(self, dt):
         # Check for keys that are continuously pressed
         keys = pygame.key.get_pressed()
         # Initialize direction vector
@@ -61,8 +66,15 @@ class Character(pygame.sprite.Sprite):
         # Adjust speed based on sprinting state
         if sprinting:
             self.speed = self.sprinting_speed
+            self.stamina -= self.stamina_degen_rate * dt # Reduce stamina
+            if self.stamina <= 0:
+                self.stamina = 0
+                self.speed = self.walking_speed
         else:
             self.speed = self.walking_speed
+            self.stamina += self.stamina_regen_rate * dt# Increase stamina
+            if self.stamina >= self.max_stamina:
+                self.stamina = self.max_stamina
 
     def get_status(self):
         if self.direction.magnitude() == 0:
@@ -81,8 +93,23 @@ class Character(pygame.sprite.Sprite):
         self.pos.y += self.direction.y * self.speed * dt
         self.rect.centery = self.pos.y
 
+    def draw_stamina_bar(self, display_surface):
+        self.stamina_bar_width = OVERLAY_POSITIONS['Stamina']['size'][0]  # Width of the stamina bar
+        self.stamina_bar_height = OVERLAY_POSITIONS['Stamina']['size'][1]  # Height of the stamina bar
+        self.stamina_bar_x = OVERLAY_POSITIONS['Stamina']['position'][0]  # X-coordinate of the top-left corner of the stamina bar
+        self.stamina_bar_y = OVERLAY_POSITIONS['Stamina']['position'][1]  # Y-coordinate of the top-left corner of the stamina bar
+
+        # Calculate the current stamina bar width based on the current stamina value
+        self.current_stamina_width = (self.stamina / self.max_stamina) * self.stamina_bar_width
+
+        # Draw the background of the stamina bar (gray)
+        pygame.draw.rect(display_surface, (128, 128, 128), (self.stamina_bar_x, self.stamina_bar_y, self.stamina_bar_width, self.stamina_bar_height))
+        
+        # Draw the current stamina bar (green)
+        pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, self.stamina_bar_y, self.current_stamina_width, self.stamina_bar_height)) 
+
     def update(self, dt):
-        self.input()
+        self.input(dt)
         self.get_status()
         self.move(dt)
         self.animate(dt)
