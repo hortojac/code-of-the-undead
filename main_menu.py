@@ -51,7 +51,7 @@ class MainMenu:
         self.of_bi_y = 2*(SCREEN_HEIGHT/6) - 40#y position of of_binary png
         self.of_bi_2 = pygame.image.load("./assets/of_bi.png")#load the png of word of in binary
         self.of_bi_2_width = self.of_bi_width#gets width of of_bi binary
-        self.of_bi_2_x = 0 + self.of_bi_width#x position of binary png
+        self.of_bi_2_x = self.of_bi_x - self.of_bi_2_width#x position of binary png
         self.of_bi_2_y = self.of_bi_y#y position of of_binary png
 
         self.the_bi = pygame.image.load("./assets/the_bi.png")#load the png of word the in binary
@@ -78,7 +78,7 @@ class MainMenu:
         self.initials_bi_y = 5*(SCREEN_HEIGHT/6) - 40#y position of undead_binary png
         self.initials_bi_2 = pygame.image.load("./assets/GSNJE_bi.png")#load the png of word undead in binary
         self.initials_bi_2_width = self.initials_bi_width#gets width of undead_bi binary
-        self.initials_bi_2_x = 0 + self.initials_bi_width#x position of undead binary png
+        self.initials_bi_2_x = self.initials_bi_x - self.initials_bi_2_width#x position of undead binary png
         self.initials_bi_2_y = self.initials_bi_y#y position of undead_binary png
 
     #This function is called over and over in main when game_state is 0 (main menu)
@@ -97,14 +97,14 @@ class MainMenu:
 
         self.display_surface.blit(self.of_bi, (self.of_bi_x, self.of_bi_y))#draw binary of
         self.display_surface.blit(self.of_bi_2, (self.of_bi_2_x, self.of_bi_2_y))#draw 2nd binary of
-        if self.of_bi_2_x == 0:#if the 2nd png of the bi image has reached the left side of the screen
-            self.of_bi_x = 0 + self.of_bi_2_width#it puts the first image of binary on the end of thet 2nd
+        if self.of_bi_2_x  == 0:#if the 2nd png of the bi image has reached the right side of the screen
+            self.of_bi_x = 0 - self.of_bi_width#it puts the first image of binary with its right end on the 0th pixel
         else:
-            self.of_bi_x -= 0.25#scroll the binary of png
-        if self.of_bi_x == 0:#if the first png of the bi image is on the left side of the screen
-            self.of_bi_2_x = 0 + self.of_bi_width#it puts the second image of binary on the end of the first
+            self.of_bi_x += 0.25#scroll the binary of png
+        if self.of_bi_x == 0:#if the first png of the bi image is on the right side of the screen
+            self.of_bi_2_x = 0 - self.of_bi_2_width#it puts the second image of binary with its right end on the 0th pixel
         else:
-            self.of_bi_2_x -= 0.25#scroll 2nd binary of png
+            self.of_bi_2_x += 0.25#scroll 2nd binary of png
 
         self.display_surface.blit(self.the_bi, (self.the_bi_x, self.the_bi_y))#draw binary the
         self.display_surface.blit(self.the_bi_2, (self.the_bi_2_x, self.the_bi_2_y))#draw 2nd binary the
@@ -130,14 +130,14 @@ class MainMenu:
 
         self.display_surface.blit(self.initials_bi, (self.initials_bi_x, self.initials_bi_y))#draw binary the
         self.display_surface.blit(self.initials_bi_2, (self.initials_bi_2_x, self.initials_bi_2_y))#draw 2nd binary the
-        if self.initials_bi_2_x == 0:#if the 2nd png of the bi image has reached the left side of the screen
-            self.initials_bi_x = 0 + self.initials_bi_2_width#it puts the first image of binary on the end of thet 2nd
+        if self.initials_bi_2_x == 0:#if the 2nd png of the bi image has reached the right side of the screen
+            self.initials_bi_x = 0 - self.initials_bi_width#it puts the first image of binary with its right end on the 0th pixel
         else:
-            self.initials_bi_x -= 1#scroll the binary the png
-        if self.initials_bi_x == 0:#if the first png of the bi image is on the left side of the screen
-            self.initials_bi_2_x = 0 + self.initials_bi_width#it puts the second image of binary on the end of the first
+            self.initials_bi_x += 1#scroll the binary the png
+        if self.initials_bi_x == 0:#if the first png of the bi image is on the right side of the screen
+            self.initials_bi_2_x = 0 - self.initials_bi_2_width#it puts the second image of binary with its right end on the 0th pixel
         else:
-            self.initials_bi_2_x -= 1#scroll 2nd binary the png
+            self.initials_bi_2_x += 1#scroll 2nd binary the png
         self.display_surface.blit(self.title, self.title_pos)#draws the title
         self.display_surface.blit(self.exit_button, self.exit_button_pos)#draws the exit button
         self.display_surface.blit(self.play_button, self.play_button_pos)#draws the play button
