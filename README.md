@@ -1,6 +1,5 @@
 # Code of the Undead
 ---
-[Sprint1 - Documents](https://docs.google.com/document/d/1C2G8U8p-tBIkUrwwdTQZz-P4G9u9ERkW4uObry0RhCI/edit?usp=sharing)
 ## Setup
 1. clone this repo
 1. `pip install -r requirements.txt`
