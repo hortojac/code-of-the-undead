@@ -1,5 +1,17 @@
-from os import walk
+"""
+Description: This script contains the support functions for the game.
+Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
+Date Created: September 19, 2023
+Date Modified: October 04, 2023
+Version: Development
+Python Version: 3.11.5
+Dependencies: pygame
+License: MIT License
+"""
+
+# Imports
 import pygame
+from os import walk
 
 def import_folder(path):
     surface_list = []

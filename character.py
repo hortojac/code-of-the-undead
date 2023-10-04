@@ -1,3 +1,15 @@
+"""
+Description: This script contains the Character class, which is used to create the playable character.
+Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
+Date Created: September 19, 2023
+Date Modified: October 04, 2023
+Version: Development
+Python Version: 3.11.5
+Dependencies: pygame
+License: MIT License
+"""
+
+# Imports
 import pygame
 from settings import *
 from support import *

@@ -1,5 +1,17 @@
-import sys
+"""
+Description: This script contains the main game loop and is the entry point for the game.
+Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
+Date Created: September 19, 2023
+Date Modified: October 04, 2023
+Version: Development
+Python Version: 3.11.5
+Dependencies: pygame
+License: MIT License
+"""
+
+# Imports
 import pygame
+import sys
 from settings import *
 from map import Map
 from main_menu import MainMenu
