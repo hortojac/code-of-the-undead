@@ -49,7 +49,10 @@ class Character(pygame.sprite.Sprite):
             self.animations[animation] = import_folder(full_path)
 
     def animate(self, dt):
-        self.frame_index += 4 * dt
+        if self.speed == self.walking_speed:
+            self.frame_index += 4 * dt
+        elif self.speed == self.sprinting_speed:
+            self.frame_index += 8 * dt
         if self.frame_index >= len(self.animations[self.status]):
             self.frame_index = 0
         self.image = self.animations[self.status][int(self.frame_index)]
@@ -60,7 +63,7 @@ class Character(pygame.sprite.Sprite):
         # Initialize direction vector
         self.direction = pygame.math.Vector2(0, 0)
         # Check for sprinting (SHIFT key)
-        sprinting = keys[KEY_SPRINT]
+        self.sprinting = keys[KEY_SPRINT]
         # Set the direction vector and status based on the keys pressed
         if keys[KEY_LEFT]:
             self.direction.x = -1
@@ -76,12 +79,17 @@ class Character(pygame.sprite.Sprite):
             self.status = 'down'
 
         # Adjust speed based on sprinting state
-        if sprinting:
+        if self.sprinting:
             self.speed = self.sprinting_speed # Set speed to sprinting speed
-            self.stamina -= self.stamina_degen_rate * dt * 1.25 # Reduce stamina
-            if self.stamina <= 0: # Make sure stamina doesn't go below 0
-                self.stamina = 0 # Set stamina to 0 when it goes below 0
-                self.speed = self.walking_speed # Set speed to walking speed
+            if self.direction.magnitude() > 0: # Check if the character is moving
+                self.stamina -= self.stamina_degen_rate * dt * 1.25 # Reduce stamina
+                if self.stamina <= 0: # Make sure stamina doesn't go below 0
+                    self.stamina = 0 # Set stamina to 0 when it goes below 0
+                    self.speed = self.walking_speed # Set speed to walking speed
+            elif self.direction.magnitude() == 0 and self.stamina < self.max_stamina:
+                self.stamina += self.stamina_regen_rate * dt * 1.25
+                if self.stamina >= self.max_stamina:
+                    self.stamina = self.max_stamina
         else:
             self.speed = self.walking_speed # Set speed to walking speed
             self.stamina += self.stamina_regen_rate * dt * 1.25 # Increase stamina
