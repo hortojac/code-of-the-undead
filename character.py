@@ -40,6 +40,10 @@ class Character(pygame.sprite.Sprite):
         self.stamina_regen_rate = 10  # Stamina regeneration rate per second
         self.stamina_degen_rate = 20  # Stamina degeneration rate per second
 
+        # Health variables
+        self.max_health = 100  # Initial maximum health value
+        self.health = self.max_health  # Current health value
+
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'right': [], 'left': [
         ], 'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': []}
@@ -130,7 +134,26 @@ class Character(pygame.sprite.Sprite):
         pygame.draw.rect(display_surface, (128, 128, 128), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.stamina_bar_width, self.stamina_bar_height))
         
         # Draw the current stamina bar (green), accounting for Stamina text size (20) and padding (10)
-        pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.current_stamina_width, self.stamina_bar_height)) 
+        pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.current_stamina_width, self.stamina_bar_height))
+    
+    def draw_health_bar(self, display_surface):
+        self.health_bar_width = OVERLAY_POSITIONS['Health']['size'][0]
+        self.health_bar_height = OVERLAY_POSITIONS['Health']['size'][1]
+        self.health_bar_x = OVERLAY_POSITIONS['Health']['position'][0]
+        self.health_bar_y = OVERLAY_POSITIONS['Health']['position'][1]
+
+        # Calculate the current health bar width based on the current health value
+        self.current_health_width = (self.health / self.max_health) * self.health_bar_width
+
+        font = pygame.font.SysFont('Arial', 20) # Font for the health text
+        text_surface = font.render('Health:', True, (0, 0, 0))
+        display_surface.blit(text_surface, (self.health_bar_x, self.health_bar_y))
+
+        # Draw the background of the health bar (gray), accounting for Health text size (20) and padding (10)
+        pygame.draw.rect(display_surface, (128, 128, 128), (self.health_bar_x, (self.health_bar_y + 30), self.health_bar_width, self.health_bar_height))
+
+        # Draw the current health bar (red), accounting for Health text size (20) and padding (10)
+        pygame.draw.rect(display_surface, (255, 0, 0), (self.health_bar_x, (self.health_bar_y + 30), self.current_health_width, self.health_bar_height))
 
     def update(self, dt):
         self.input(dt)
