@@ -2,7 +2,7 @@
 Description: This script contains the Character class, which is used to create the playable character.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: September 19, 2023
-Date Modified: October 04, 2023
+Date Modified: October 06, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -17,6 +17,8 @@ from support import *
 class Character(pygame.sprite.Sprite):
     def __init__(self, pos, group):
         super().__init__(group)
+
+        self.font = pygame.font.SysFont('Arial', 20) # Font for the stamina and health text
 
         # Call the import_assets method to import all the animations
         self.import_assets()
@@ -35,14 +37,18 @@ class Character(pygame.sprite.Sprite):
         self.sprinting_speed = 200  # Sprinting speed
 
         # Stamina variables
+        self.sprinting_bool = False # Boolean to check if character is sprinting or not
         self.max_stamina = 100  # Initial maximum stamina value
         self.stamina = self.max_stamina  # Current stamina value
         self.stamina_regen_rate = 10  # Stamina regeneration rate per second
         self.stamina_degen_rate = 20  # Stamina degeneration rate per second
 
         # Health variables
+        self.health_bool = True # Boolean to check if character is losing health or not
         self.max_health = 100  # Initial maximum health value
         self.health = self.max_health  # Current health value
+        self.health_regen_rate = 1  # Health regeneration rate per second
+        self.health_degen_rate = 10  # Health degeneration rate per second
 
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'right': [], 'left': [
@@ -84,21 +90,13 @@ class Character(pygame.sprite.Sprite):
 
         # Adjust speed based on sprinting state
         if self.sprinting:
-            self.speed = self.sprinting_speed # Set speed to sprinting speed
-            if self.direction.magnitude() > 0: # Check if the character is moving
-                self.stamina -= self.stamina_degen_rate * dt * 1.25 # Reduce stamina
-                if self.stamina <= 0: # Make sure stamina doesn't go below 0
-                    self.stamina = 0 # Set stamina to 0 when it goes below 0
-                    self.speed = self.walking_speed # Set speed to walking speed
-            elif self.direction.magnitude() == 0 and self.stamina < self.max_stamina:
-                self.stamina += self.stamina_regen_rate * dt * 1.25
-                if self.stamina >= self.max_stamina:
-                    self.stamina = self.max_stamina
+            self.speed = self.sprinting_speed # Set speed to sprinting speed if sprinting
+            self.sprinting_bool = True # Set sprinting boolean to true if sprinting
+            if self.stamina == 0:
+                self.speed = self.walking_speed # Set speed to walking speed if stamina is 0 (out of stamina)
         else:
-            self.speed = self.walking_speed # Set speed to walking speed
-            self.stamina += self.stamina_regen_rate * dt * 1.25 # Increase stamina
-            if self.stamina >= self.max_stamina: # Make sure stamina doesn't exceed the maximum value
-                self.stamina = self.max_stamina # Set stamina to the maximum value
+            self.speed = self.walking_speed # Set speed to walking speed if not sprinting
+            self.sprinting_bool = False # Set sprinting boolean to false if not sprinting
 
     def get_status(self):
         if self.direction.magnitude() == 0:
@@ -117,7 +115,21 @@ class Character(pygame.sprite.Sprite):
         self.pos.y += self.direction.y * self.speed * dt
         self.rect.centery = self.pos.y
 
-    def draw_stamina_bar(self, display_surface):
+    def draw_stamina_bar(self, display_surface, dt):
+        if self.sprinting_bool: # If sprinting, degenerate stamina
+            if self.direction.magnitude() > 0: # If moving, degenerate stamina
+                self.stamina -= self.stamina_degen_rate * dt * 1.25 # Degenerate stamina
+                if self.stamina <= 0: # If stamina is less than or equal to 0, set stamina to 0
+                    self.stamina = 0 # Set stamina to 0
+            elif self.direction.magnitude() == 0 and self.stamina < self.max_stamina: # Check if not moving and stamina is less than max stamina
+                self.stamina += self.stamina_regen_rate * dt * 1.25 # Regenerate stamina
+                if self.stamina >= self.max_stamina: # If stamina is greater than or equal to max stamina, set stamina to max stamina
+                    self.stamina = self.max_stamina # Set stamina to max stamina
+        else:
+            self.stamina += self.stamina_regen_rate * dt * 1.25 # Regenerate stamina
+            if self.stamina >= self.max_stamina: # If stamina is greater than or equal to max stamina, set stamina to max stamina
+                self.stamina = self.max_stamina # Set stamina to max stamina
+
         self.stamina_bar_width = OVERLAY_POSITIONS['Stamina']['size'][0]  # Width of the stamina bar
         self.stamina_bar_height = OVERLAY_POSITIONS['Stamina']['size'][1]  # Height of the stamina bar
         self.stamina_bar_x = OVERLAY_POSITIONS['Stamina']['position'][0]  # X-coordinate of the top-left corner of the stamina bar
@@ -125,9 +137,7 @@ class Character(pygame.sprite.Sprite):
 
         # Calculate the current stamina bar width based on the current stamina value
         self.current_stamina_width = (self.stamina / self.max_stamina) * self.stamina_bar_width
-
-        font = pygame.font.SysFont('Arial', 20) # Font for the stamina text
-        text_surface = font.render('Stamina:', True, (0, 0, 0)) # Create the stamina text surface
+        text_surface = self.font.render('Stamina:', True, (0, 0, 0)) # Create the stamina text surface
         display_surface.blit(text_surface, (self.stamina_bar_x, self.stamina_bar_y)) # Draws text above the stamina bar
 
         # Draw the background of the stamina bar (gray), accounting for Stamina text size (20) and padding (10)
@@ -136,17 +146,24 @@ class Character(pygame.sprite.Sprite):
         # Draw the current stamina bar (green), accounting for Stamina text size (20) and padding (10)
         pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.current_stamina_width, self.stamina_bar_height))
     
-    def draw_health_bar(self, display_surface):
-        self.health_bar_width = OVERLAY_POSITIONS['Health']['size'][0]
-        self.health_bar_height = OVERLAY_POSITIONS['Health']['size'][1]
-        self.health_bar_x = OVERLAY_POSITIONS['Health']['position'][0]
-        self.health_bar_y = OVERLAY_POSITIONS['Health']['position'][1]
+    def draw_health_bar(self, display_surface, dt):
+        if self.health_bool: # If health_bool is true, regenerate health
+            self.health += self.health_regen_rate * dt * 1.25 # Regenerate health
+            if self.health >= self.max_health: # If health is greater than or equal to max health, set health to max health
+                self.health = self.max_health # Set health to max health
+        else: 
+            self.health -= self.health_degen_rate * dt * 1.25 # Degenerate health
+            if self.health <= 0: # If health is less than or equal to 0, set health to 0
+                self.health = 0 # Set health to 0
+
+        self.health_bar_width = OVERLAY_POSITIONS['Health']['size'][0] # Width of the health bar
+        self.health_bar_height = OVERLAY_POSITIONS['Health']['size'][1] # Height of the health bar
+        self.health_bar_x = OVERLAY_POSITIONS['Health']['position'][0] # X-coordinate of the top-left corner of the health bar
+        self.health_bar_y = OVERLAY_POSITIONS['Health']['position'][1] # Y-coordinate of the top-left corner of the health bar
 
         # Calculate the current health bar width based on the current health value
         self.current_health_width = (self.health / self.max_health) * self.health_bar_width
-
-        font = pygame.font.SysFont('Arial', 20) # Font for the health text
-        text_surface = font.render('Health:', True, (0, 0, 0))
+        text_surface = self.font.render('Health:', True, (0, 0, 0))
         display_surface.blit(text_surface, (self.health_bar_x, self.health_bar_y))
 
         # Draw the background of the health bar (gray), accounting for Health text size (20) and padding (10)
