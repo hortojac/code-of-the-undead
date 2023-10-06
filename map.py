@@ -2,7 +2,7 @@
 Description: This script contains the Map class which is responsible for drawing the tile map and all sprites.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: September 19, 2023
-Date Modified: October 04, 2023
+Date Modified: October 06, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -55,24 +55,18 @@ class Map:
                 # Draw the base tile on the display surface
                 self.display_surface.blit(tile_image, (x, y))
 
-        # Draw a test rectangle
+        #TODO - Remove this test rect and replace with a sprite when enemies are implemented
         self.test_rect = pygame.Rect((SCREEN_WIDTH // 1.2), (SCREEN_HEIGHT // 2), 32, 32)
         pygame.draw.rect(self.display_surface, (255, 0, 0), self.test_rect)
 
         if self.character.rect.colliderect(self.test_rect):
-            self.character.health -= 20  * dt * 1.25
-            if self.character.health <= 0:
-                self.character.health = 0
-                pygame.quit()
-                sys.exit()
+            self.character.health_bool = False
         else:
-            self.character.health += 10 * dt * 1.25
-            if self.character.health >= self.character.max_health:
-                self.character.health = self.character.max_health
+            self.character.health_bool = True
 
         # Draw all sprites on top of the grid
-        self.character.draw_stamina_bar(self.display_surface)
-        self.character.draw_health_bar(self.display_surface)
+        self.character.draw_stamina_bar(self.display_surface, dt)
+        self.character.draw_health_bar(self.display_surface, dt)
         self.all_sprites.draw(self.display_surface)
         self.all_sprites.update(dt)
 
