@@ -11,6 +11,7 @@ License: MIT License
 
 # Imports
 import pygame
+import sys
 from settings import *
 from character import Character
 
@@ -54,10 +55,29 @@ class Map:
                 # Draw the base tile on the display surface
                 self.display_surface.blit(tile_image, (x, y))
 
+        # Draw a test rectangle
+        self.test_rect = pygame.Rect((SCREEN_WIDTH // 1.2), (SCREEN_HEIGHT // 2), 32, 32)
+        pygame.draw.rect(self.display_surface, (255, 0, 0), self.test_rect)
+
+        if self.character.rect.colliderect(self.test_rect):
+            self.character.health -= 20  * dt * 1.25
+            if self.character.health <= 0:
+                self.character.health = 0
+                pygame.quit()
+                sys.exit()
+        else:
+            self.character.health += 10 * dt * 1.25
+            if self.character.health >= self.character.max_health:
+                self.character.health = self.character.max_health
+
         # Draw all sprites on top of the grid
         self.character.draw_stamina_bar(self.display_surface)
+        self.character.draw_health_bar(self.display_surface)
         self.all_sprites.draw(self.display_surface)
         self.all_sprites.update(dt)
+
+
+        
 
 
 

@@ -31,7 +31,11 @@ OVERLAY_POSITIONS = {
     'Stamina': {
         'position': (10, 10), # (x, y)
         'size': (200, 20)  # (width, height)
-    }
+    },
+    'Health': {
+        'position': (10, 70), # (x, y)
+        'size': (200, 20)  # (width, height)
+    },
 }
 
 # Define deafult key bindings
