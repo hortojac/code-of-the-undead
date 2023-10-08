@@ -11,9 +11,9 @@ License: MIT License
 
 # Imports
 import pygame
-import sys
 from settings import *
 from character import Character
+from enemy import Enemy
 
 class Map:
     def __init__(self):
@@ -29,6 +29,7 @@ class Map:
 
     def setup(self):
         self.character = Character(((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)), self.all_sprites)
+        self.enemy_one = Enemy((0,0))
 
     def calculate_offset(self):
         # Calculate the offset of the tile map in the x and y direction
@@ -55,14 +56,13 @@ class Map:
                 # Draw the base tile on the display surface
                 self.display_surface.blit(tile_image, (x, y))
 
-        #TODO - Remove this test rect and replace with a sprite when enemies are implemented
-        self.test_rect = pygame.Rect((SCREEN_WIDTH // 1.2), (SCREEN_HEIGHT // 2), 32, 32)
-        pygame.draw.rect(self.display_surface, (255, 0, 0), self.test_rect)
-
-        if self.character.rect.colliderect(self.test_rect):
+        self.enemy_one.update(self.character.pos)  # update enemyone
+        if self.character.rect.colliderect(self.enemy_one.rect) : # If the enemy and player collide
             self.character.health_bool = False
         else:
             self.character.health_bool = True
+
+        self.enemy_one.draw() # Draw the enemy
 
         # Draw all sprites on top of the grid
         self.character.draw_stamina_bar(self.display_surface, dt)
