@@ -2,7 +2,7 @@
 Description: This script contains the Character class, which is used to create the playable character.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: September 19, 2023
-Date Modified: October 06, 2023
+Date Modified: October 08, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -11,6 +11,7 @@ License: MIT License
 
 # Imports
 import pygame
+import sys
 from settings import *
 from support import *
 
@@ -28,11 +29,12 @@ class Character(pygame.sprite.Sprite):
         # Set the image and rect attributes for the character
         self.image = self.animations[self.status][self.frame_index]
         self.rect = self.image.get_rect(center=pos)
+        self.z = LAYERS['player']
 
         # Movement of the character
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
-        self.speed = 0 # Initialize speed to 0
+        self.speed = 0  # Initialize speed to 0
         self.walking_speed = 100  # Waling speed
         self.sprinting_speed = 200  # Sprinting speed
 
@@ -141,8 +143,9 @@ class Character(pygame.sprite.Sprite):
         display_surface.blit(text_surface, (self.stamina_bar_x, self.stamina_bar_y)) # Draws text above the stamina bar
 
         # Draw the background of the stamina bar (gray), accounting for Stamina text size (20) and padding (10)
-        pygame.draw.rect(display_surface, (128, 128, 128), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.stamina_bar_width, self.stamina_bar_height))
-        
+        pygame.draw.rect(display_surface, (128, 128, 128), (self.stamina_bar_x, (
+            self.stamina_bar_y + 30), self.stamina_bar_width, self.stamina_bar_height))
+
         # Draw the current stamina bar (green), accounting for Stamina text size (20) and padding (10)
         pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.current_stamina_width, self.stamina_bar_height))
     
@@ -154,7 +157,10 @@ class Character(pygame.sprite.Sprite):
         else: 
             self.health -= self.health_degen_rate * dt * 1.25 # Degenerate health
             if self.health <= 0: # If health is less than or equal to 0, set health to 0
-                self.health = 0 # Set health to 0
+                # TODO Add in character death animation and game over screen
+                pygame.quit() # Close game
+                sys.exit()
+                # self.health = 0 # Set health to 0
 
         self.health_bar_width = OVERLAY_POSITIONS['Health']['size'][0] # Width of the health bar
         self.health_bar_height = OVERLAY_POSITIONS['Health']['size'][1] # Height of the health bar
