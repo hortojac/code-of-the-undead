@@ -33,7 +33,7 @@ OVERLAY_POSITIONS = {
         'size': (200, 20)  # (width, height)
     },
     'Health': {
-        'position': (10, 70),  # (x, y)
+        'position': (10, 70), # (x, y)
         'size': (200, 20)  # (width, height)
     },
 }
