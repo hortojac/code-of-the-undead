@@ -21,19 +21,19 @@ TITLE_SIZE = 64
 # Overlay size and position
 OVERLAY_POSITIONS = {
     'Ranged_Weapon': {
-        'position': (40, SCREEN_HEIGHT - 15), # (x, y)
+        'position': (40, SCREEN_HEIGHT - 15),  # (x, y)
         'size': (0, 0)  # (width, height)
     },
     'Melee_Weapon': {
-        'position': (70, SCREEN_HEIGHT - 5), # (x, y)
+        'position': (70, SCREEN_HEIGHT - 5),  # (x, y)
         'size': (0, 0)  # (width, height)
     },
     'Stamina': {
-        'position': (10, 10), # (x, y)
+        'position': (10, 10),  # (x, y)
         'size': (200, 20)  # (width, height)
     },
     'Health': {
-        'position': (10, 70), # (x, y)
+        'position': (10, 70),  # (x, y)
         'size': (200, 20)  # (width, height)
     },
 }
@@ -45,3 +45,11 @@ KEY_LEFT = pygame.K_a  # Move left
 KEY_RIGHT = pygame.K_d  # Move right
 
 KEY_SPRINT = pygame.K_LSHIFT  # Sprint
+
+LAYERS = {
+    'background': 0,
+    'player': 1,
+    'foreground': 2,
+    'overlay': 3,
+    'rain': 4,
+}
