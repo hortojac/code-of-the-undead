@@ -52,6 +52,9 @@ class Character(pygame.sprite.Sprite):
         self.health_regen_rate = 1  # Health regeneration rate per second
         self.health_degen_rate = 10  # Health degeneration rate per second
 
+        self.talking_with_npc = False # Boolean to check if character is talking with an NPC or not
+        self.delete_enemy = False # TODO : Remove this, just for testing purposes
+
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'right': [], 'left': [
         ], 'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': []}
@@ -69,7 +72,7 @@ class Character(pygame.sprite.Sprite):
             self.frame_index = 0
         self.image = self.animations[self.status][int(self.frame_index)]
 
-    def input(self, dt):
+    def input(self):
         # Check for keys that are continuously pressed
         keys = pygame.key.get_pressed()
         # Initialize direction vector
@@ -89,6 +92,10 @@ class Character(pygame.sprite.Sprite):
         elif keys[KEY_DOWN]:
             self.direction.y = 1
             self.status = 'down'
+
+        self.toggle_enemy = keys[pygame.K_e] # TODO : Remove this, just for testing purposes
+        if self.toggle_enemy:
+            self.delete_enemy = True
 
         # Adjust speed based on sprinting state
         if self.sprinting:
@@ -179,7 +186,7 @@ class Character(pygame.sprite.Sprite):
         pygame.draw.rect(display_surface, (255, 0, 0), (self.health_bar_x, (self.health_bar_y + 30), self.current_health_width, self.health_bar_height))
 
     def update(self, dt):
-        self.input(dt)
+        self.input()
         self.get_status()
         self.move(dt)
         self.animate(dt)
