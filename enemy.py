@@ -21,7 +21,7 @@ class Enemy:
         self.health = 10  # Set enemy health
         self.rect = self.image.get_rect(center=pos)  # Make a rect that matches image
         self.pos = pygame.math.Vector2(self.rect.center)  # Set position
-        self.z = LAYERS['player']  # Set layer
+        self.z = LAYERS['enemy']  # Set layer
         self.speed = 50  # Movement speed
 
     def update(self, player_pos, dt):
