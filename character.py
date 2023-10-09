@@ -12,6 +12,7 @@ License: MIT License
 # Imports
 import pygame
 import sys
+import math
 from settings import *
 from support import *
 
@@ -52,6 +53,10 @@ class Character(pygame.sprite.Sprite):
         self.health_regen_rate = 1  # Health regeneration rate per second
         self.health_degen_rate = 10  # Health degeneration rate per second
 
+        # List to hold character's bullets
+        self.bullets = []
+
+
     def import_assets(self):
         self.animations = {'up': [], 'down': [], 'right': [], 'left': [
         ], 'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': []}
@@ -89,6 +94,10 @@ class Character(pygame.sprite.Sprite):
         elif keys[KEY_DOWN]:
             self.direction.y = 1
             self.status = 'down'
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN: # Detects key inputs
+                mousex, mousey = pygame.mouse.get_pos()
+                self.shoot(mousex, mousey)
 
         # Adjust speed based on sprinting state
         if self.sprinting:
@@ -178,8 +187,51 @@ class Character(pygame.sprite.Sprite):
         # Draw the current health bar (red), accounting for Health text size (20) and padding (10)
         pygame.draw.rect(display_surface, (255, 0, 0), (self.health_bar_x, (self.health_bar_y + 30), self.current_health_width, self.health_bar_height))
 
+    # Shoot function
+    def shoot(self, mousex, mousey, speed = 5):
+        distance_x = mousex - self.pos.x
+        distance_y = mousey - self.pos.y
+        shoot_angle = math.atan2(distance_y, distance_x)
+        self.bullets.append(Projectile(self.pos.x, self.pos.y, 6, (0,0,0), math.cos(shoot_angle), math.sin(shoot_angle)))  
+
     def update(self, dt):
         self.input(dt)
         self.get_status()
         self.move(dt)
         self.animate(dt)
+        
+        # Loop that iterates through all bullets
+        for bullet in self.bullets:
+            if bullet.x < 9000 and bullet.x > 0 and bullet.y < 9000 and bullet.y > 0:
+                bullet.x += bullet.xvel  # Moves the bullet by its x velocity
+                bullet.y += bullet.yvel  # Moves the bullet by its y velocity
+            else:
+                self.bullets.pop(self.bullets.index(bullet))  # This will remove the bullet if it is off screen
+
+
+# Projectile class
+class Projectile(object):
+    def __init__(self,x,y,radius,color,xangle, yangle):
+        # Sets position, appearance, and trajectory of projectile
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = color
+        self.image = pygame.image.load("./assets/textures/character/bulletone.png")  # Load image
+        self.rect = self.image.get_rect(center=(self.x, self.y))  # Make a rect that matches image
+        self.xfacing = xangle
+        self.yfacing = yangle
+        self.z = LAYERS['bullet']  # Set layer
+
+        # Sets velocity of projectile. Current speed is 8; Hope to add modifiable speed per weapon
+        speed = 10
+        self.xvel = speed * xangle
+        self.yvel = speed * yangle
+
+    # Draw function called by map to draw circle on screen
+    def draw(self):
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+        surface = pygame.display.get_surface()  # Get the surface
+        pygame.draw.circle(surface, self.color, (self.x,self.y), self.radius)
+        surface.blit(self.image, self.rect.topleft)  # Print the image using top-left as reference
+        

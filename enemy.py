@@ -36,6 +36,9 @@ class Enemy:
             pygame.quit()  # Close game
             sys.exit()  # End game
 
+    def hurt(self, damage):
+        self.health -= damage
+
     def draw(self):
         surface = pygame.display.get_surface()  # Get the surface
         surface.blit(self.image, self.rect.topleft)  # Print the image using top-left as reference

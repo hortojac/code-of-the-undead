@@ -17,7 +17,7 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 from settings import *
 from character import Character
-from enemy import Enemy
+from enemy import Enemy 
 from sprites import Generic
 
 class Map:
@@ -48,6 +48,11 @@ class Map:
         self.character.draw_health_bar(self.display_surface, dt)
         self.all_sprites.update(dt)
         self.enemy_one.update(self.character.pos, dt)  # update enemyone
+        for bullet in self.character.bullets:
+            bullet.draw()
+            if bullet.rect.colliderect(self.enemy_one.rect):
+                self.enemy_one.hurt(1)
+                print("collide")
 
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
@@ -73,3 +78,4 @@ class CameraGroup(pygame.sprite.Group):
                 if sprite.z == layer:
                     offset_pos = sprite.rect.topleft - self.offset
                     self.display_surface.blit(sprite.image, offset_pos)
+
