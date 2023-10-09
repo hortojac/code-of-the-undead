@@ -50,6 +50,7 @@ KEY_SPRINT = pygame.K_LSHIFT  # Sprint
 LAYERS = {
     'background': 0,
     'player': 1,
+    'bullet' : 1,
     'enemy': 1,
     'npc': 1,
     'foreground': 2,

@@ -20,7 +20,7 @@ from pygame.surface import Surface
 from settings import *
 from character import Character
 from enemy import Enemy
-from npc import NPC
+from npc import NPC 
 from sprites import Generic
 
 openai_api_key = os.environ.get('OPENAI_API_KEY')
@@ -67,6 +67,11 @@ class Map:
         self.character.draw_health_bar(self.display_surface, dt) # Draw health bar
         self.all_sprites.update(dt) # update all sprites
         self.enemy_one.update(self.character.pos, dt)  # update enemyone
+        for bullet in self.character.bullets:
+            bullet.draw()
+            if bullet.rect.colliderect(self.enemy_one.rect):
+                self.enemy_one.hurt(1)
+                print("collide")
 
         # TODO : Temporary input code for talking, need to move to character class
         # This function is for handling key inputs and the text box for talking
@@ -149,3 +154,4 @@ class CameraGroup(pygame.sprite.Group):
                 if sprite.z == layer:
                     offset_pos = sprite.rect.topleft - self.offset
                     self.display_surface.blit(sprite.image, offset_pos)
+
