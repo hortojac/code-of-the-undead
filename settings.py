@@ -51,6 +51,7 @@ LAYERS = {
     'background': 0,
     'player': 1,
     'enemy': 1,
+    'npc': 1,
     'foreground': 2,
     'overlay': 3,
     'rain': 4,
