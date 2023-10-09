@@ -46,6 +46,7 @@ KEY_RIGHT = pygame.K_d  # Move right
 
 KEY_SPRINT = pygame.K_LSHIFT  # Sprint
 
+# Define Layers for the game
 LAYERS = {
     'background': 0,
     'player': 1,

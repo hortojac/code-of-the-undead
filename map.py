@@ -42,11 +42,11 @@ class Map:
             self.character.health_bool = True
 
         # Draw all sprites on top of the grid
-        self.all_sprites.custom_draw(self.character)
-        self.enemy_one.draw()
-        self.character.draw_stamina_bar(self.display_surface, dt)
-        self.character.draw_health_bar(self.display_surface, dt)
-        self.all_sprites.update(dt)
+        self.all_sprites.custom_draw(self.character) # Draw character on top of map
+        self.enemy_one.draw() # Draw enemy
+        self.character.draw_stamina_bar(self.display_surface, dt) # Draw stamina bar
+        self.character.draw_health_bar(self.display_surface, dt) # Draw health bar
+        self.all_sprites.update(dt) # update all sprites
         self.enemy_one.update(self.character.pos, dt)  # update enemyone
 
 class CameraGroup(pygame.sprite.Group):
@@ -54,20 +54,19 @@ class CameraGroup(pygame.sprite.Group):
         super().__init__()
         self.display_surface = pygame.display.get_surface()
 
-        # camera offset
+        # Camera offset
         self.offset = pygame.math.Vector2()
         self.half_w = self.display_surface.get_size()[0] // 2
         self.half_h = self.display_surface.get_size()[1] // 2
 
     def center_target_camera(self, target):
-        self.offset.x = target.rect.centerx - self.half_w
+        self.offset.x = target.rect.centerx - self.half_w 
         self.offset.y = target.rect.centery - self.half_h
 
     def custom_draw(self, character):
+        self.center_target_camera(character) # Center camera on player
 
-        self.center_target_camera(character)
-
-        # active elements
+        # Active elements
         for layer in LAYERS.values():
             for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
                 if sprite.z == layer:
