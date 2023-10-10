@@ -19,7 +19,7 @@ from pygame.rect import Rect
 from pygame.surface import Surface
 from settings import *
 from character import Character
-from enemy import Enemy
+from zombie import Zombie
 from npc import NPC 
 from sprites import Generic
 
@@ -44,34 +44,35 @@ class Map:
     def setup(self):
         Generic(pos=(0, 0), surf=pygame.image.load(
             './assets/Test_map/map.png').convert_alpha(), groups=self.all_sprites, z=LAYERS['background'])
-        self.character = Character((640, 360), self.all_sprites)
-        self.enemy_one = Enemy((0,0))
+        self.character = Character(((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)), self.all_sprites)
+        self.zombie = Zombie((0,0), self.all_sprites)
         self.npc = NPC(((SCREEN_WIDTH // 2 + 100), (SCREEN_HEIGHT // 2 + 200)), self.all_sprites)
 
     def run(self, dt):
         # Fill the display surface with a background color (white)
         self.display_surface.fill('white')
 
-        if self.character.rect.colliderect(self.enemy_one.rect) : # If the enemy and player collide
+        self.zombie.character_input(self.character.pos)
+
+        if self.character.rect.colliderect(self.zombie.rect) : # If the enemy and player collide
             self.character.health_bool = False
         else:
             self.character.health_bool = True
 
         if self.character.delete_enemy: # TODO : Remove this, just for testing purposes
-            self.enemy_one.pos = (0,0)
+            self.zombie.pos = pygame.math.Vector2(0,0)
+
+        for bullet in self.character.bullets:
+            bullet.draw()
+            if bullet.rect.colliderect(self.zombie.rect):
+                self.zombie.hurt(1)
+                print("collide")
 
         # Draw all sprites on top of the grid
         self.all_sprites.custom_draw(self.character) # Draw character on top of map
-        self.enemy_one.draw() # Draw enemy
         self.character.draw_stamina_bar(self.display_surface, dt) # Draw stamina bar
         self.character.draw_health_bar(self.display_surface, dt) # Draw health bar
         self.all_sprites.update(dt) # update all sprites
-        self.enemy_one.update(self.character.pos, dt)  # update enemyone
-        for bullet in self.character.bullets:
-            bullet.draw()
-            if bullet.rect.colliderect(self.enemy_one.rect):
-                self.enemy_one.hurt(1)
-                print("collide")
 
         # TODO : Temporary input code for talking, need to move to character class
         # This function is for handling key inputs and the text box for talking
