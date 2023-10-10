@@ -4,7 +4,7 @@
 1. clone this repo
 1. `pip install -r requirements.txt`
 1. `git fetch origin`
-1. `git checkout sprint-2`
+1. `git checkout sprint-3`
 1. `export OPENAI_API_KEY='your_api_key_here'`
 
 ## Run

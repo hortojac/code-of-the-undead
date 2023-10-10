@@ -2,7 +2,7 @@
 Description: This script contains the Character class, which is used to create the playable character.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: September 19, 2023
-Date Modified: October 08, 2023
+Date Modified: October 09, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -126,11 +126,11 @@ class Character(pygame.sprite.Sprite):
 
         # Horizontal movement
         self.pos.x += self.direction.x * self.speed * dt
-        self.rect.centerx = self.pos.x
+        self.rect.centerx = round(self.pos.x)  # Round the value before updating
 
         # Vertical movement
         self.pos.y += self.direction.y * self.speed * dt
-        self.rect.centery = self.pos.y
+        self.rect.centery = round(self.pos.y)  # Round the value before updating
 
     def draw_stamina_bar(self, display_surface, dt):
         if self.sprinting_bool: # If sprinting, degenerate stamina
@@ -202,8 +202,8 @@ class Character(pygame.sprite.Sprite):
 
     def update(self, dt):
         self.input()
-        self.get_status()
         self.move(dt)
+        self.get_status()
         self.animate(dt)
         
         # Loop that iterates through all bullets

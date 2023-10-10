@@ -2,7 +2,7 @@
 Description: This script contains the Map class which is responsible for drawing the tile map and all sprites.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: September 19, 2023
-Date Modified: October 08, 2023
+Date Modified: October 09, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -52,8 +52,6 @@ class Map:
         # Fill the display surface with a background color (white)
         self.display_surface.fill('white')
 
-        self.zombie.character_input(self.character.pos)
-
         if self.character.rect.colliderect(self.zombie.rect) : # If the enemy and player collide
             self.character.health_bool = False
         else:
@@ -72,6 +70,7 @@ class Map:
         self.all_sprites.custom_draw(self.character) # Draw character on top of map
         self.character.draw_stamina_bar(self.display_surface, dt) # Draw stamina bar
         self.character.draw_health_bar(self.display_surface, dt) # Draw health bar
+        self.zombie.character_input(self.character.pos)
         self.all_sprites.update(dt) # update all sprites
 
         # TODO : Temporary input code for talking, need to move to character class

@@ -64,10 +64,12 @@ class Zombie(pygame.sprite.Sprite):
             self.status = 'right'
         if direction_to_character.y < 0:
             self.direction.y = -1
-            self.status = 'up'
+            if self.direction.x == 0:
+                self.status = 'up'
         elif direction_to_character.y > 0:
             self.direction.y = 1
-            self.status = 'down'
+            if self.direction.x == 0:
+                self.status = 'down'
 
     def hurt(self, damage):
         self.health -= damage
@@ -86,13 +88,13 @@ class Zombie(pygame.sprite.Sprite):
 
         # Horizontal movement
         self.pos.x += self.direction.x * self.speed * dt
-        self.rect.centerx = self.pos.x
+        self.rect.centerx = round(self.pos.x)  # Round the value before updating
 
         # Vertical movement
         self.pos.y += self.direction.y * self.speed * dt
-        self.rect.centery = self.pos.y  
-
+        self.rect.centery = round(self.pos.y)  # Round the value before updating
+ 
     def update(self, dt):
-        self.get_status()
         self.move(dt)
+        self.get_status()
         self.animate(dt)
