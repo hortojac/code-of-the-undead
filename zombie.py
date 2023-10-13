@@ -2,7 +2,7 @@
 Description: This script contains the Zombie class, which is used to create enemies.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: October 08, 2023
-Date Modified: October 09, 2023
+Date Modified: October 13, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -36,13 +36,38 @@ class Zombie(pygame.sprite.Sprite):
 
         self.health = 10 # Health of the zombie
 
-    def import_assets(self):
-        self.animations = {'up': [], 'down': [], 'right': [], 'left': [
-        ], 'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': []}
-        # Import all the animations
-        for animation in self.animations.keys():
-            full_path = "./assets/textures/zombie/" + animation
-            self.animations[animation] = import_folder(full_path)
+    def import_assets(self): # TODO : Need to add animation import for attack and death
+        # Imports zombie animations from sprite sheets.
+        self.animations = {
+            'up': [], 'down': [], 'right': [], 'left': [],
+            'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': []
+        }
+        
+        # Define sprite sheet configurations
+        sprite_sheets = {
+            './assets/textures/zombie/zombie_walk.png': {
+                'rows': 4, 'cols': 10, 'animations': ['down', 'up', 'right', 'left']
+            },
+            './assets/textures/zombie/zombie_idle.png': {
+                'rows': 4, 'cols': 5, 'animations': ['down_idle', 'up_idle', 'right_idle', 'left_idle']
+            }
+        }
+        
+        for path, config in sprite_sheets.items():
+            sprite_sheet = pygame.image.load(path).convert_alpha()
+            sprite_width = sprite_sheet.get_width() // config['cols']
+            sprite_height = sprite_sheet.get_height() // config['rows']
+            
+            # Ensure the number of animations matches the number of rows
+            if len(config['animations']) != config['rows']:
+                raise ValueError(f"Number of animations for {path} does not match the number of rows.")
+            
+            for row in range(config['rows']):
+                for col in range(config['cols']):
+                    x = col * sprite_width
+                    y = row * sprite_height
+                    sprite = sprite_sheet.subsurface(pygame.Rect(x, y, sprite_width, sprite_height))
+                    self.animations[config['animations'][row]].append(sprite)
 
     def animate(self, dt):
         self.frame_index += 4 * dt
