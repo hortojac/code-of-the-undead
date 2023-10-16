@@ -32,8 +32,8 @@ class Character(pygame.sprite.Sprite):
         self.z = LAYERS['player']
 
         # Movement of the character
-        self.direction = pygame.math.Vector2()
-        self.pos = pygame.math.Vector2(self.rect.center)
+        self.direction = pygame.math.Vector2() # Initialize the direction vector
+        self.pos = pygame.math.Vector2(self.rect.center) # Initialize the position vector
         self.speed = 0  # Initialize speed to 0
         self.walking_speed = 100  # Waling speed
         self.sprinting_speed = 200  # Sprinting speed
@@ -53,6 +53,7 @@ class Character(pygame.sprite.Sprite):
         self.health_degen_rate = 10  # Health degeneration rate per second
 
         self.talking_with_npc = False # Boolean to check if character is talking with an NPC or not
+        self.equip_weapon = False # Boolean to check if character has equiped pistol or not
         self.delete_enemy = False # TODO : Remove this, just for testing purposes
 
         # List to hold character's bullets
@@ -62,7 +63,8 @@ class Character(pygame.sprite.Sprite):
         # Imports character animations from sprite sheets.
         self.animations = {
             'up': [], 'down': [], 'right': [], 'left': [],
-            'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': []
+            'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': [],
+            'up_shoot': [], 'down_shoot': [], 'right_shoot': [], 'left_shoot': []
         }
         
         # Define sprite sheet configurations
@@ -72,6 +74,9 @@ class Character(pygame.sprite.Sprite):
             },
             './assets/textures/character/character_idle.png': {
                 'rows': 4, 'cols': 2, 'animations': ['down_idle', 'up_idle', 'right_idle', 'left_idle']
+            },
+            './assets/textures/character/character_shoot.png': {
+                'rows': 4, 'cols': 4, 'animations': ['down_shoot', 'up_shoot', 'right_shoot', 'left_shoot']
             }
         }
         
@@ -101,10 +106,9 @@ class Character(pygame.sprite.Sprite):
         self.image = self.animations[self.status][int(self.frame_index)]
 
     def input(self):
+        self.direction = pygame.math.Vector2(0,0)
         # Check for keys that are continuously pressed
         keys = pygame.key.get_pressed()
-        # Initialize direction vector
-        self.direction = pygame.math.Vector2(0, 0)
         # Check for sprinting (SHIFT key)
         self.sprinting = keys[KEY_SPRINT]
         # Set the direction vector and status based on the keys pressed
@@ -125,9 +129,13 @@ class Character(pygame.sprite.Sprite):
                 mousex, mousey = pygame.mouse.get_pos()
                 self.shoot(mousex, mousey)
 
-        self.toggle_enemy = keys[pygame.K_e] # TODO : Remove this, just for testing purposes
+        self.toggle_enemy = keys[pygame.K_z] # TODO : Remove this, just for testing purposes
         if self.toggle_enemy:
             self.delete_enemy = True
+
+        self.toggle_weapon = keys[KEY_WEAPON]
+        if self.toggle_weapon:
+            self.equip_weapon = True
 
         # Adjust speed based on sprinting state
         if self.sprinting:
@@ -142,6 +150,8 @@ class Character(pygame.sprite.Sprite):
     def get_status(self):
         if self.direction.magnitude() == 0:
             self.status = self.status.split('_')[0] + '_idle'
+        if self.equip_weapon:
+            self.status = self.status.split('_')[0] + '_shoot'
 
     def move(self, dt):
         # Normalize the direction vector
