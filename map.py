@@ -54,8 +54,11 @@ class Map:
 
         if self.character.rect.colliderect(self.zombie.rect) : # If the enemy and player collide
             self.character.health_bool = False
+            self.zombie.attack_bool = True
+            self.zombie.kill_zombie(1)
         else:
             self.character.health_bool = True
+            self.zombie.attack_bool = False
 
         if self.character.delete_enemy: # TODO : Remove this, just for testing purposes
             self.zombie.pos = pygame.math.Vector2(0,0)
@@ -63,73 +66,15 @@ class Map:
         for bullet in self.character.bullets:
             bullet.draw()
             if bullet.rect.colliderect(self.zombie.rect):
-                self.zombie.hurt(1)
+                self.zombie.kill_zombie(1)
                 print("collide")
 
         # Draw all sprites on top of the grid
         self.all_sprites.custom_draw(self.character) # Draw character on top of map
         self.character.draw_stamina_bar(self.display_surface, dt) # Draw stamina bar
         self.character.draw_health_bar(self.display_surface, dt) # Draw health bar
-        self.zombie.character_input(self.character.pos)
+        self.zombie.character_input(self.character.pos) # Send character position to zombie
         self.all_sprites.update(dt) # update all sprites
-
-        # TODO : Temporary input code for talking, need to move to character class
-        # This function is for handling key inputs and the text box for talking
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if self.text_box_active:
-                    if event.key == pygame.K_ESCAPE:
-                        self.text_box_active = False
-                        self.character.talking_with_npc = False
-                        self.input_text = ""
-                        self.output_text = ""
-                    elif event.key == pygame.K_RETURN:
-                        self.output_text = self.get_openai_response(self.input_text)
-                        self.input_text = ""     
-                    elif event.key == pygame.K_BACKSPACE:
-                        self.input_text = self.input_text[:-1]
-                    elif event.key == pygame.K_F1:
-                        self.input_text = "Hi, how are you?"
-                    else:
-                        self.input_text += event.unicode
-                elif not self.text_box_active:
-                    distance = math.dist(self.character.pos, self.npc.pos)
-                    if distance <= 48 and event.key == pygame.K_t:
-                        self.text_box_active = True
-                        self.character.talking_with_npc = True
-                        self.input_text = ""
-                        self.output_text = ""
-
-        if self.text_box_active:
-            # Cursor blinking
-            if pygame.time.get_ticks() - self.cursor_time > 500:  # blink every 500 milliseconds
-                self.cursor_visible = not self.cursor_visible
-                self.cursor_time = pygame.time.get_ticks()
-
-            # INPUT TEXT
-            txt_surface = self.font.render(self.input_text, True, (0,0,0))
-            self.display_surface.blit(txt_surface, (self.input_rect.x + 5, self.input_rect.y + 5))
-            
-            # Adjust cursor position based on the last line
-            if self.cursor_visible:
-                cursor_y_pos = self.input_rect.y + 5
-                cursor_x_pos = self.input_rect.x + 5 + self.font.size(self.input_text)[0]
-                pygame.draw.line(self.display_surface, (0,0,0), (cursor_x_pos, cursor_y_pos), (cursor_x_pos, cursor_y_pos + self.font.get_height()))
-            pygame.draw.rect(self.display_surface, (0,0,0), self.input_rect, 2)
-            
-            # AI OUTPUT
-            txt_surface_output = self.font.render(self.output_text, True, (0,0,0))
-            self.display_surface.blit(txt_surface_output, (self.output_rect.x + 5, self.output_rect.y + 5))
-            pygame.draw.rect(self.display_surface, (0,0,0), self.output_rect, 2)
-
-    # Function to send a query to OpenAI and get a response
-    def get_openai_response(self, query):
-        response = openai.Completion.create(
-            engine="davinci",
-            prompt=query,
-            max_tokens=10
-        )
-        return response.choices[0].text.strip()
 
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):

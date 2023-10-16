@@ -46,6 +46,8 @@ KEY_RIGHT = pygame.K_d  # Move right
 
 KEY_SPRINT = pygame.K_LSHIFT  # Sprint
 
+KEY_WEAPON = pygame.K_e # Equip weapon
+
 # Define Layers for the game
 LAYERS = {
     'background': 0,
