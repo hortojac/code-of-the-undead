@@ -2,7 +2,7 @@
 Description: This script contains the Character class, which is used to create the playable character.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: September 19, 2023
-Date Modified: October 13, 2023
+Date Modified: October 22, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -11,14 +11,14 @@ License: MIT License
 
 # Imports
 import pygame
-import sys
-import math
+import threading
+import time
 from settings import *
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, pos, group):
+    def __init__(self, pos, group, camera_group):
         super().__init__(group)
-
+        self.camera_group = camera_group
         self.font = pygame.font.SysFont('Arial', 20) # Font for the stamina and health text
 
         # Call the import_assets method to import all the animations
@@ -46,6 +46,7 @@ class Character(pygame.sprite.Sprite):
         self.stamina_degen_rate = 20  # Stamina degeneration rate per second
 
         # Health variables
+        self.death_bool = False # Boolean to check if character is dead or not
         self.health_bool = True # Boolean to check if character is losing health or not
         self.max_health = 100  # Initial maximum health value
         self.health = self.max_health  # Current health value
@@ -54,17 +55,14 @@ class Character(pygame.sprite.Sprite):
 
         self.talking_with_npc = False # Boolean to check if character is talking with an NPC or not
         self.equip_weapon = False # Boolean to check if character has equiped pistol or not
-        self.delete_enemy = False # TODO : Remove this, just for testing purposes
-
-        # List to hold character's bullets
-        self.bullets = []
 
     def import_assets(self):
-        # Imports character animations from sprite sheets.
+        # Imports character animations from sprite sheets
         self.animations = {
             'up': [], 'down': [], 'right': [], 'left': [],
             'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': [],
-            'up_shoot': [], 'down_shoot': [], 'right_shoot': [], 'left_shoot': []
+            'up_shoot': [], 'down_shoot': [], 'right_shoot': [], 'left_shoot': [],
+            'up_death': [], 'down_death': [], 'right_death': [], 'left_death': []
         }
         
         # Define sprite sheet configurations
@@ -77,6 +75,9 @@ class Character(pygame.sprite.Sprite):
             },
             './assets/textures/character/character_shoot.png': {
                 'rows': 4, 'cols': 4, 'animations': ['down_shoot', 'up_shoot', 'right_shoot', 'left_shoot']
+            },
+            './assets/textures/character/character_death.png': {
+                'rows': 4, 'cols': 4, 'animations': ['down_death', 'up_death', 'right_death', 'left_death']
             }
         }
         
@@ -101,8 +102,12 @@ class Character(pygame.sprite.Sprite):
             self.frame_index += 4 * dt
         elif self.speed == self.sprinting_speed:
             self.frame_index += 8 * dt
-        if self.frame_index >= len(self.animations[self.status]):
-            self.frame_index = 0
+        if self.death_bool: 
+            if self.frame_index >= len(self.animations[self.status]) - 1: 
+                self.frame_index = len(self.animations[self.status]) - 1 # Stop at the last frame
+        else:
+            if self.frame_index >= len(self.animations[self.status]):
+                self.frame_index = 0
         self.image = self.animations[self.status][int(self.frame_index)]
 
     def input(self):
@@ -124,18 +129,17 @@ class Character(pygame.sprite.Sprite):
         elif keys[KEY_DOWN]:
             self.direction.y = 1
             self.status = 'down'
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN: # Detects key inputs
-                mousex, mousey = pygame.mouse.get_pos()
-                self.shoot(mousex, mousey)
-
-        self.toggle_enemy = keys[pygame.K_z] # TODO : Remove this, just for testing purposes
-        if self.toggle_enemy:
-            self.delete_enemy = True
-
+        
+        # Checks for user equiping weapon
         self.toggle_weapon = keys[KEY_WEAPON]
         if self.toggle_weapon:
             self.equip_weapon = True
+
+        if self.equip_weapon:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:  # Detects mouse click
+                    mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
+                    self.shoot(mousex, mousey) # Shoots bullet
 
         # Adjust speed based on sprinting state
         if self.sprinting:
@@ -152,6 +156,8 @@ class Character(pygame.sprite.Sprite):
             self.status = self.status.split('_')[0] + '_idle'
         if self.equip_weapon:
             self.status = self.status.split('_')[0] + '_shoot'
+        if self.death_bool:
+            self.status = self.status.split('_')[0] + '_death'
 
     def move(self, dt):
         # Normalize the direction vector
@@ -197,8 +203,13 @@ class Character(pygame.sprite.Sprite):
 
         # Draw the current stamina bar (green), accounting for Stamina text size (20) and padding (10)
         pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.current_stamina_width, self.stamina_bar_height))
-    
+
+    def delayed_kill(self):
+            time.sleep(5)
+            self.kill()
+
     def draw_health_bar(self, display_surface, dt):
+
         if self.health_bool: # If health_bool is true, regenerate health
             self.health += self.health_regen_rate * dt * 1.25 # Regenerate health
             if self.health >= self.max_health: # If health is greater than or equal to max health, set health to max health
@@ -206,10 +217,10 @@ class Character(pygame.sprite.Sprite):
         else: 
             self.health -= self.health_degen_rate * dt * 1.25 # Degenerate health
             if self.health <= 0: # If health is less than or equal to 0, set health to 0
-                # TODO Add in character death animation and game over screen
-                pygame.quit() # Close game
-                sys.exit()
-                # self.health = 0 # Set health to 0
+                self.death_bool = True
+                self.direction.magnitude() == 0
+                timer_thread = threading.Thread(target=self.delayed_kill)
+                timer_thread.start()
 
         self.health_bar_width = OVERLAY_POSITIONS['Health']['size'][0] # Width of the health bar
         self.health_bar_height = OVERLAY_POSITIONS['Health']['size'][1] # Height of the health bar
@@ -227,50 +238,41 @@ class Character(pygame.sprite.Sprite):
         # Draw the current health bar (red), accounting for Health text size (20) and padding (10)
         pygame.draw.rect(display_surface, (255, 0, 0), (self.health_bar_x, (self.health_bar_y + 30), self.current_health_width, self.health_bar_height))
 
-    # Shoot function
-    def shoot(self, mousex, mousey, speed = 5):
-        distance_x = mousex - self.pos.x
-        distance_y = mousey - self.pos.y
-        shoot_angle = math.atan2(distance_y, distance_x)
-        self.bullets.append(Projectile(self.pos.x, self.pos.y, 6, (0,0,0), math.cos(shoot_angle), math.sin(shoot_angle)))  
+    def shoot(self, mousex, mousey):
+        camera_offset = self.camera_group.offset # Get the camera offset
+        world_mouse_pos = pygame.math.Vector2(mousex, mousey) + camera_offset # Get the world mouse position
+        direction = world_mouse_pos - self.pos # Get the direction vector
+        normalized_direction = direction.normalize() # Normalize the direction vector
+        bullet_velocity = normalized_direction * 500 # Set the velocity of the bullet
+        Bullet(self.pos, bullet_velocity, self.groups()[0]) # Create a bullet
 
     def update(self, dt):
-        self.input()
-        self.move(dt)
-        self.get_status()
-        self.animate(dt)
-        
-        # Loop that iterates through all bullets
-        for bullet in self.bullets:
-            if bullet.x < 9000 and bullet.x > 0 and bullet.y < 9000 and bullet.y > 0:
-                bullet.x += bullet.xvel  # Moves the bullet by its x velocity
-                bullet.y += bullet.yvel  # Moves the bullet by its y velocity
-            else:
-                self.bullets.pop(self.bullets.index(bullet))  # This will remove the bullet if it is off screen
+        self.input() # Get input from the user
+        self.move(dt) # Move the character
+        self.get_status() # Get the status of the character
+        self.animate(dt) # Animate the character
 
-# Projectile class
-class Projectile(object):
-    def __init__(self,x,y,radius,color,xangle, yangle):
-        # Sets position, appearance, and trajectory of projectile
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.color = color
-        self.image = pygame.image.load("./assets/textures/character/bulletone.png")  # Load image
-        self.rect = self.image.get_rect(center=(self.x, self.y))  # Make a rect that matches image
-        self.xfacing = xangle
-        self.yfacing = yangle
-        self.z = LAYERS['bullet']  # Set layer
+MAP_BOUNDARY = pygame.Rect(0, 0, 1387, 872) # HACK: Hard-coded map boundary
 
-        # Sets velocity of projectile. Current speed is 8; Hope to add modifiable speed per weapon
-        speed = 10
-        self.xvel = speed * xangle
-        self.yvel = speed * yangle
+class Bullet(pygame.sprite.Sprite): # FIXME: Add bullet sprites to this classes using the above method.
+    def __init__(self, pos, velocity, group):
+        super().__init__(group)
+        self.velocity = velocity # Velocity of the bullet
+        self.image = pygame.Surface((10, 10), pygame.SRCALPHA) # Create a surface for the bullet
+        pygame.draw.circle(self.image, (0, 0, 0), (5, 5), 5) # Draw a circle on the surface
+        self.rect = self.image.get_rect(center=pos) # Set the rect attribute of the bullet
+        self.pos = pygame.math.Vector2(pos) # Set the pos attribute of the bullet
+        self.z = LAYERS['bullet'] # Set the z attribute of the bullet
 
-    # Draw function called by map to draw circle on screen
-    def draw(self):
-        self.rect = self.image.get_rect(center=(self.x, self.y))
-        surface = pygame.display.get_surface()  # Get the surface
-        pygame.draw.circle(surface, self.color, (self.x,self.y), self.radius)
-        surface.blit(self.image, self.rect.topleft)  # Print the image using top-left as reference
+    def update(self, dt):
+        self.pos += self.velocity * dt # Update the position of the bullet
+        self.rect.center = self.pos # Update the rect attribute of the bullet
+        if not MAP_BOUNDARY.colliderect(self.rect):  # Check against the map boundary instead of screen rect
+            self.kill() # Kill the bullet if it is outside the map boundary
+
+
+
+
+
+
         
