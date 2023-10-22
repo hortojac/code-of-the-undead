@@ -53,10 +53,10 @@ class NPC(pygame.sprite.Sprite):
         
         # Define sprite sheet configurations
         sprite_sheets = {
-            './assets/textures/character/character_walk.png': {
+            './assets/textures/npc/npc_walk.png': {
                 'rows': 4, 'cols': 4, 'animations': ['down', 'up', 'right', 'left']
             },
-            './assets/textures/character/character_idle.png': {
+            './assets/textures/npc/npc_idle.png': {
                 'rows': 4, 'cols': 2, 'animations': ['down_idle', 'up_idle', 'right_idle', 'left_idle']
             }
         }
