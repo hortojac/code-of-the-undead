@@ -51,7 +51,7 @@ class Character(pygame.sprite.Sprite):
         self.max_health = 100  # Initial maximum health value
         self.health = self.max_health  # Current health value
         self.health_regen_rate = 1  # Health regeneration rate per second
-        self.health_degen_rate = 10  # Health degeneration rate per second
+        self.health_degen_rate = 25  # Health degeneration rate per second
 
         self.talking_with_npc = False # Boolean to check if character is talking with an NPC or not
         self.equip_weapon = False # Boolean to check if character has equiped pistol or not
@@ -130,11 +130,14 @@ class Character(pygame.sprite.Sprite):
             self.direction.y = 1
             self.status = 'down'
         
-        # Checks for user equiping weapon
-        self.toggle_weapon = keys[KEY_WEAPON]
-        if self.toggle_weapon:
-            self.equip_weapon = True
+        # Check for user equiping weapon
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == KEY_WEAPON:
+                    self.equip_weapon = not self.equip_weapon
+                    print(self.equip_weapon)
 
+        # Check for user clicking mouse
         if self.equip_weapon:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:  # Detects mouse click
