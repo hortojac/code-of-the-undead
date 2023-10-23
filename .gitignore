@@ -6,3 +6,7 @@ __pycache__/
 
 # Ignore vscode settings
 .vscode/
+
+# Ignore Mac OS X system files
+**/.DS_Store
+

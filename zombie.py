@@ -2,7 +2,7 @@
 Description: This script contains the Zombie class, which is used to create enemies.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: October 08, 2023
-Date Modified: October 13, 2023
+Date Modified: October 22, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -11,12 +11,15 @@ License: MIT License
 
 # Imports
 import pygame
+import threading
+import time
 from settings import *
-from support import *
 
 class Zombie(pygame.sprite.Sprite):
-    def __init__(self, pos, group):
+    def __init__(self, pos, group, character):
         super().__init__(group)
+
+        self.character = character  # Store a reference to the character
 
         # Call the import_assets method to import all the animations
         self.import_assets()
@@ -41,7 +44,7 @@ class Zombie(pygame.sprite.Sprite):
         self.death_bool = False # Boolean to determine if the zombie is dead  
 
     def import_assets(self):
-        # Imports zombie animations from sprite sheets.
+        # Imports zombie animations from sprite sheets
         self.animations = {
             'up': [], 'down': [], 'right': [], 'left': [],
             'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': [],
@@ -91,10 +94,10 @@ class Zombie(pygame.sprite.Sprite):
                 self.frame_index = 0
         self.image = self.animations[self.status][int(self.frame_index)]
 
-    def character_input(self, character_pos):
+    def character_input(self):
         self.direction = pygame.math.Vector2(0,0)
         # Get the direction vector to the character
-        self.direction_to_character = character_pos - self.pos
+        self.direction_to_character = self.character.pos - self.pos
         # Set the direction vector and status based on character movement
         if not self.death_bool: # Ensure the zombie sprite doesn't flip if it's in its death state
             if self.direction_to_character.x < 0:
@@ -113,12 +116,16 @@ class Zombie(pygame.sprite.Sprite):
                     self.status = 'down'
 
     def kill_zombie(self, damage):
-        self.health -= damage
+        self.health -= damage # Reduce the health of the zombie
         if self.health <= 0:
             self.death_bool = True
-            self.direction.magnitude() == 0
-            self.direction_to_character == 0
-            # TODO: Add self.kill()? 
+            self.direction.magnitude() == 0 # Stop moving
+            timer_thread = threading.Thread(target=self.delayed_kill) # Create a thread to kill the zombie after 5 seconds
+            timer_thread.start() # Start the thread
+
+    def delayed_kill(self):
+        time.sleep(5) # Wait 5 seconds
+        self.kill() # Kill the zombie
 
     def get_status(self):
         if self.direction.magnitude() == 0:
@@ -142,9 +149,10 @@ class Zombie(pygame.sprite.Sprite):
         self.rect.centery = round(self.pos.y) # Round the value before updating
 
     def update(self, dt):
+        self.character_input() # Update direction and speed to follow the character
         if not self.death_bool:
             self.move(dt) # Only move if not in the death state
-        self.get_status()
-        self.animate(dt)
+        self.get_status() # Update the status (animation)
+        self.animate(dt) # Update the animation
         
 
