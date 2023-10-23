@@ -1,5 +1,6 @@
 # Code of the Undead
 ---
+[LangChain Generative Agent Code](https://colab.research.google.com/drive/1l2tB8dCyReNvehxCeFaIL1r3oAMGQmR6?usp=sharing)
 ## Setup
 1. clone this repo
 1. `pip install -r requirements.txt`
