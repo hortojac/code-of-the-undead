@@ -2,7 +2,7 @@
 Description: This script contains the Zombie class, which is used to create enemies.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: October 08, 2023
-Date Modified: October 22, 2023
+Date Modified: October 25, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -16,10 +16,11 @@ import time
 from settings import *
 
 class Zombie(pygame.sprite.Sprite):
-    def __init__(self, pos, group, character):
+    def __init__(self, pos, group, character, npc):
         super().__init__(group)
 
         self.character = character  # Store a reference to the character
+        self.npc = npc # Store a reference to the npc
 
         # Call the import_assets method to import all the animations
         self.import_assets()
@@ -94,26 +95,37 @@ class Zombie(pygame.sprite.Sprite):
                 self.frame_index = 0
         self.image = self.animations[self.status][int(self.frame_index)]
 
-    def character_input(self):
+    def follow_human(self):
         self.direction = pygame.math.Vector2(0,0)
-        # Get the direction vector to the character
-        self.direction_to_character = self.character.pos - self.pos
-        # Set the direction vector and status based on character movement
-        if not self.death_bool: # Ensure the zombie sprite doesn't flip if it's in its death state
-            if self.direction_to_character.x < 0:
-                self.direction.x = -1
-                self.status = 'left'
-            elif self.direction_to_character.x > 0:
-                self.direction.x = 1
-                self.status = 'right'
-            if self.direction_to_character.y < 0:
-                self.direction.y = -1
-                if self.direction.x == 0:
-                    self.status = 'up'
-            elif self.direction_to_character.y > 0:
-                self.direction.y = 1
-                if self.direction.x == 0:
-                    self.status = 'down'
+        # Calculate the distance to the character and to the npc
+        distance_to_character = (self.character.pos - self.pos).length()
+        distance_to_npc = (self.npc.pos - self.pos).length()
+        # Compare the distances
+        if distance_to_character < distance_to_npc:
+            target_pos = self.character.pos
+        else:
+            target_pos = self.npc.pos
+        # Calculate the distance to the target
+        distance_to_target = (target_pos - self.pos).length()
+        # Only follow if within 256 units
+        if distance_to_target <= 256:
+            self.direction_to_human = target_pos - self.pos
+            # Set the direction vector and status based on character movement
+            if not self.death_bool: # Ensure the zombie sprite doesn't flip if it's in its death state
+                if self.direction_to_human.x < 0:
+                    self.direction.x = -1
+                    self.status = 'left'
+                elif self.direction_to_human.x > 0:
+                    self.direction.x = 1
+                    self.status = 'right'
+                if self.direction_to_human.y < 0:
+                    self.direction.y = -1
+                    if self.direction.x == 0:
+                        self.status = 'up'
+                elif self.direction_to_human.y > 0:
+                    self.direction.y = 1
+                    if self.direction.x == 0:
+                        self.status = 'down'
 
     def kill_zombie(self, damage):
         self.health -= damage # Reduce the health of the zombie
@@ -149,7 +161,7 @@ class Zombie(pygame.sprite.Sprite):
         self.rect.centery = round(self.pos.y) # Round the value before updating
 
     def update(self, dt):
-        self.character_input() # Update direction and speed to follow the character
+        self.follow_human() # Update direction and speed to follow the character
         if not self.death_bool:
             self.move(dt) # Only move if not in the death state
         self.get_status() # Update the status (animation)
