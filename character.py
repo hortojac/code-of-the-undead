@@ -2,7 +2,7 @@
 Description: This script contains the Character class, which is used to create the playable character.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: September 19, 2023
-Date Modified: October 22, 2023
+Date Modified: October 25, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -208,8 +208,8 @@ class Character(pygame.sprite.Sprite):
         pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.current_stamina_width, self.stamina_bar_height))
 
     def delayed_kill(self):
-            time.sleep(5)
-            self.kill()
+            time.sleep(5) # Wait 5 seconds
+            self.kill() # Kill the character
 
     def draw_health_bar(self, display_surface, dt):
 
@@ -221,9 +221,9 @@ class Character(pygame.sprite.Sprite):
             self.health -= self.health_degen_rate * dt * 1.25 # Degenerate health
             if self.health <= 0: # If health is less than or equal to 0, set health to 0
                 self.death_bool = True
-                self.direction.magnitude() == 0
-                timer_thread = threading.Thread(target=self.delayed_kill)
-                timer_thread.start()
+                self.direction.magnitude() == 0 # Stop moving
+                timer_thread = threading.Thread(target=self.delayed_kill) # Create a thread to kill the character after 5 seconds
+                timer_thread.start() # Start the thread
 
         self.health_bar_width = OVERLAY_POSITIONS['Health']['size'][0] # Width of the health bar
         self.health_bar_height = OVERLAY_POSITIONS['Health']['size'][1] # Height of the health bar
