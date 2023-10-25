@@ -2,7 +2,7 @@
 Description: This script contains the Map class which is responsible for drawing the tile map and all sprites.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: September 19, 2023
-Date Modified: October 22, 2023
+Date Modified: October 25, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -51,7 +51,7 @@ class Map:
         self.npc = NPC(((SCREEN_WIDTH // 2 + 100), (SCREEN_HEIGHT // 2 + 200)), self.all_sprites, self.character)
         for i in range(2):
             zombie_position = (i * 500, 0)
-            zombie = Zombie(zombie_position, self.all_sprites, self.character)
+            zombie = Zombie(zombie_position, self.all_sprites, self.character, self.npc)
             self.zombies.append(zombie)
 
     def run(self, dt):
@@ -59,10 +59,13 @@ class Map:
         self.display_surface.fill('white')
 
         # Check collision between character and each zombie
-        collision_occurred = any(self.character.rect.colliderect(zombie.rect) for zombie in self.zombies)
-        self.character.health_bool = not collision_occurred
+        collision_with_character = any(self.character.rect.colliderect(zombie.rect) for zombie in self.zombies)
+        self.character.health_bool = not collision_with_character
+        collision_with_npc = any(self.npc.rect.colliderect(zombie.rect) for zombie in self.zombies)
+        self.npc.health_bool = not collision_with_npc
         for zombie in self.zombies:
             zombie.attack_bool = self.character.rect.colliderect(zombie.rect)
+            zombie.attack_bool = self.npc.rect.colliderect(zombie.rect)
 
         # Check collision between bullet and each zombie
         for bullet in self.all_sprites.sprites():
