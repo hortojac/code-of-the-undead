@@ -208,12 +208,6 @@ class Character(pygame.sprite.Sprite):
         # Draw the current stamina bar (green), accounting for Stamina text size (20) and padding (10)
         pygame.draw.rect(display_surface, (0, 255, 0), (self.stamina_bar_x, (self.stamina_bar_y + 30), self.current_stamina_width, self.stamina_bar_height))
 
-
-    def delayed_kill(self):
-            time.sleep(5) # Wait 5 seconds
-            self.kill() # Kill the character
-
-    
     def delayed_kill(self):
             time.sleep(5) # Wait 5 seconds
             self.kill() # Kill the character
