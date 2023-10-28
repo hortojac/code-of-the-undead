@@ -16,9 +16,11 @@ import time
 from settings import *
 
 class Zombie(pygame.sprite.Sprite):
-    def __init__(self, pos, group, character, npc):
+    def __init__(self, pos, group, character, npc, display_surface):
         super().__init__(group)
 
+        self.camera_group = group # Store a reference to the camera group
+        self.display_surface = display_surface # Store a reference to the display surface
         self.character = character  # Store a reference to the character
         self.npc = npc # Store a reference to the npc
 
@@ -163,6 +165,22 @@ class Zombie(pygame.sprite.Sprite):
         self.pos.y += self.direction.y * self.speed * dt
         self.rect.centery = round(self.pos.y) # Round the value before updating
 
+    def draw_health_bar(self):
+        camera_offset = self.camera_group.offset # Get the camera offset
+        self.health_bar_width = 32 # Width of the health bar
+        self.health_bar_height = 5 # Height of the health bar
+        self.health_bar_x = self.pos.x - camera_offset.x - 16 # X-coordinate of the top-left corner of the health bar
+        self.health_bar_y = self.pos.y - camera_offset.y - 48 # Y-coordinate of the top-left corner of the health bar
+
+        # Calculate the current health bar width based on the current health value
+        self.current_health_width = (self.health / 10) * self.health_bar_width
+
+        # Draw the background of the health bar (gray), accounting for Health text size (20) and padding (10)
+        pygame.draw.rect(self.display_surface, (128, 128, 128), (self.health_bar_x, (self.health_bar_y + 30), self.health_bar_width, self.health_bar_height))
+
+        # Draw the current health bar (red), accounting for Health text size (20) and padding (10)
+        pygame.draw.rect(self.display_surface, (255, 0, 0), (self.health_bar_x, (self.health_bar_y + 30), self.current_health_width, self.health_bar_height))
+
     def update(self, dt):
         self.is_alive() # Check if the zombie is alive
         self.follow_human() # Update direction and speed to follow the character
@@ -170,5 +188,5 @@ class Zombie(pygame.sprite.Sprite):
             self.move(dt) # Only move if not in the death state
         self.get_status() # Update the status (animation)
         self.animate(dt) # Update the animation
-        
+        self.draw_health_bar() # Draw the health bar
 
