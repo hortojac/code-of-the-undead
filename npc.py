@@ -15,11 +15,12 @@ import threading
 import time
 import math
 from settings import *
+from projectile import Projectile
 
 class NPC(pygame.sprite.Sprite):
-    def __init__(self, pos, group, character, camera_group):
+    def __init__(self, pos, group, character):
         super().__init__(group)
-        self.camera_group = camera_group
+        self.camera_group = group
         self.character = character  # Store a reference to the character
 
         # Call the import_assets method to import all the animations
@@ -60,7 +61,7 @@ class NPC(pygame.sprite.Sprite):
         self.is_shooting = False  # Add this attribute
 
         self.last_shot_time = 0  # Initialize the last shot time
-        self.shoot_cooldown = 1.0  # Cooldown time in seconds (1 second in this case)
+        self.shoot_cooldown = 0.5  # Cooldown time in seconds (1 second in this case)
         self.prev_num_zombies = 0  # Store the previous number of zombies
 
     def import_assets(self):
@@ -242,7 +243,7 @@ class NPC(pygame.sprite.Sprite):
         normalized_direction = direction.normalize()
         # Multiply the normalized direction by the bullet's speed to get the bullet's velocity
         bullet_velocity = normalized_direction * 500  # Assuming the bullet speed is 500
-        Bullet(self.pos, bullet_velocity, self.groups()[0])  # Create a bullet
+        Projectile(self.pos, bullet_velocity, self.groups()[0])  # Create a bullet
 
     def update(self, dt):
         self.follow_character()  # Update direction and speed to follow the character
@@ -251,20 +252,3 @@ class NPC(pygame.sprite.Sprite):
         self.animate(dt)  # Animate the NPC
         self.check_health(dt) # Check health
         self.check_stamina(dt) # Check stamina
-
-class Bullet(pygame.sprite.Sprite): # FIXME: Add bullet sprites to this classes using the above method.
-    def __init__(self, pos, velocity, group):
-        super().__init__(group)
-        self.velocity = velocity # Velocity of the bullet
-        image = pygame.image.load("assets/textures/character/bulletone.png")# Loads image for bullet
-        rotate_angle = math.atan(self.velocity.y/self.velocity.x) * 180 / math.pi - 90 # Calculates angle to rotate bullet by (in degrees)
-        self.image = pygame.transform.rotate(image, rotate_angle) # Sets sprite image to rotated bullet
-        self.rect = self.image.get_rect(center=pos) # Set the rect attribute of the bullet
-        self.pos = pygame.math.Vector2(pos) # Set the pos attribute of the bullet
-        self.z = LAYERS['bullet'] # Set the z attribute of the bullet
-
-    def update(self, dt):
-        self.pos += self.velocity * dt # Update the position of the bullet
-        self.rect.center = self.pos # Update the rect attribute of the bullet
-        if not MAP_BOUNDARY.colliderect(self.rect):  # Check against the map boundary instead of screen rect
-            self.kill() # Kill the bullet if it is outside the map boundary

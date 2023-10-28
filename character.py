@@ -13,13 +13,13 @@ License: MIT License
 import pygame
 import threading
 import time
-import math
 from settings import *
+from projectile import Projectile
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, pos, group, camera_group):
+    def __init__(self, pos, group):
         super().__init__(group)
-        self.camera_group = camera_group
+        self.camera_group = group
         self.font = pygame.font.SysFont('Arial', 20) # Font for the stamina and health text
 
         # Call the import_assets method to import all the animations
@@ -137,13 +137,11 @@ class Character(pygame.sprite.Sprite):
             if event.type == pygame.KEYDOWN:
                 if event.key == KEY_WEAPON:
                     self.equip_weapon = not self.equip_weapon
-                    print(self.equip_weapon)
             # Check for user clicking mouse and equipped weapon
             if event.type == pygame.MOUSEBUTTONDOWN and self.equip_weapon:
-                    if event.button == 1:   # Check if mouse event is left click
+                    if event.button == KEY_SHOOT:   # Check if mouse event is left click
                         mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
                         self.shoot(mousex, mousey) # Shoots bullet
-
 
         # Adjust speed based on sprinting state
         if self.sprinting:
@@ -247,30 +245,13 @@ class Character(pygame.sprite.Sprite):
         direction = world_mouse_pos - self.pos # Get the direction vector
         normalized_direction = direction.normalize() # Normalize the direction vector
         bullet_velocity = normalized_direction * 500 # Set the velocity of the bullet
-        Bullet(self.pos, bullet_velocity, self.groups()[0]) # Create a bullet
+        Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a bullet
 
     def update(self, dt):
         self.input() # Get input from the user
         self.move(dt) # Move the character
         self.get_status() # Get the status of the character
         self.animate(dt) # Animate the character
-
-class Bullet(pygame.sprite.Sprite): # FIXME: Add bullet sprites to this classes using the above method.
-    def __init__(self, pos, velocity, group):
-        super().__init__(group)
-        self.velocity = velocity # Velocity of the bullet
-        image = pygame.image.load("assets/textures/character/bulletone.png")# Loads image for bullet
-        rotate_angle = math.atan(self.velocity.y/self.velocity.x) * 180 / math.pi - 90 # Calculates angle to rotate bullet by (in degrees)
-        self.image = pygame.transform.rotate(image, rotate_angle) # Sets sprite image to rotated bullet
-        self.rect = self.image.get_rect(center=pos) # Set the rect attribute of the bullet
-        self.pos = pygame.math.Vector2(pos) # Set the pos attribute of the bullet
-        self.z = LAYERS['bullet'] # Set the z attribute of the bullet
-
-    def update(self, dt):
-        self.pos += self.velocity * dt # Update the position of the bullet
-        self.rect.center = self.pos # Update the rect attribute of the bullet
-        if not MAP_BOUNDARY.colliderect(self.rect):  # Check against the map boundary instead of screen rect
-            self.kill() # Kill the bullet if it is outside the map boundary
 
 
 
