@@ -15,6 +15,7 @@ import sys
 from settings import *
 from map import Map
 from main_menu import MainMenu
+from settings_menu import SettingsMenu
 
 class Game:
     # Overall class to manage game assets and behavior.
@@ -33,11 +34,12 @@ class Game:
         self.clock = pygame.time.Clock()
         # Create a Main Menu instance
         self.main_menu = MainMenu()
+        # Create a Settings Menu instance
+        self.settings_menu = SettingsMenu()
         # Create a Map instance
         self.map = Map()
-        # probably a better way to do this but for now
-        # 0 means main menu 1 means play
-        self.game_state = 0
+        # Set the game state to the main menu
+        self.game_state = "Main Menu"
 
     def run_game(self):
         # Start the main loop for the game.
@@ -54,10 +56,13 @@ class Game:
 
             dt = self.clock.tick() / 1000.0
             # Draw the menu
-            if self.game_state == 0:
+            if self.game_state == "Main Menu":
                 self.game_state = self.main_menu.run()
+             # Draw the settings menu
+            if self.game_state == "Settings":
+                self.game_state = self.settings_menu.run()
             # Draw the map
-            if self.game_state == 1:
+            if self.game_state == "Play":
                 self.map.run(dt)
             # Make the most recently drawn screen visible
             pygame.display.update()
