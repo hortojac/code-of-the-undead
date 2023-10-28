@@ -59,3 +59,5 @@ LAYERS = {
     'overlay': 3,
     'rain': 4,
 }
+
+MAP_BOUNDARY = pygame.Rect(0, 0, 1387, 872) # HACK: Hard-coded map boundary

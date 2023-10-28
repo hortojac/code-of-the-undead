@@ -255,8 +255,6 @@ class Character(pygame.sprite.Sprite):
         self.get_status() # Get the status of the character
         self.animate(dt) # Animate the character
 
-MAP_BOUNDARY = pygame.Rect(0, 0, 1387, 872) # HACK: Hard-coded map boundary
-
 class Bullet(pygame.sprite.Sprite): # FIXME: Add bullet sprites to this classes using the above method.
     def __init__(self, pos, velocity, group):
         super().__init__(group)
