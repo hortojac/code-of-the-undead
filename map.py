@@ -22,9 +22,9 @@ from character import Character
 from zombie import Zombie
 from npc import NPC 
 from sprites import Generic
-from character import Bullet as PlayerBullet
-from npc import Bullet as NPCBullet
+from projectile import Projectile
 
+# OpenAI API key
 openai_api_key = os.environ.get('OPENAI_API_KEY')
 
 class Map:
@@ -48,11 +48,11 @@ class Map:
     def setup(self):
         Generic(pos=(0, 0), surf=pygame.image.load(
             './assets/Test_map/map.png').convert_alpha(), groups=self.all_sprites, z=LAYERS['background'])
-        self.character = Character(((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)), self.all_sprites, self.all_sprites)
-        self.npc = NPC(((SCREEN_WIDTH // 2 + 100), (SCREEN_HEIGHT // 2 + 200)), self.all_sprites, self.character, self.all_sprites)
+        self.character = Character(((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)), self.all_sprites)
+        self.npc = NPC(((SCREEN_WIDTH // 2 + 100), (SCREEN_HEIGHT // 2 + 200)), self.all_sprites, self.character)
         for i in range(2):
             zombie_position = (i * 500, 0)
-            zombie = Zombie(zombie_position, self.all_sprites, self.character, self.npc)
+            zombie = Zombie(zombie_position, self.all_sprites, self.character, self.npc, self.display_surface)
             self.zombies.append(zombie)
 
     def run(self, dt):
@@ -71,7 +71,7 @@ class Map:
 
         # Check collision between bullet and each zombie
         for bullet in self.all_sprites.sprites():
-            if isinstance(bullet, PlayerBullet) or isinstance(bullet, NPCBullet):
+            if isinstance(bullet, Projectile):
                 for zombie in self.zombies:
                     if zombie.is_alive() and zombie.rect.colliderect(bullet.rect):
                         zombie.kill_zombie(2)
