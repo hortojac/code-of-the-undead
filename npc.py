@@ -13,12 +13,13 @@ License: MIT License
 import pygame
 import threading
 import time
+import math
 from settings import *
 
 class NPC(pygame.sprite.Sprite):
-    def __init__(self, pos, group, character):
+    def __init__(self, pos, group, character, camera_group):
         super().__init__(group)
-
+        self.camera_group = camera_group
         self.character = character  # Store a reference to the character
 
         # Call the import_assets method to import all the animations
@@ -39,6 +40,7 @@ class NPC(pygame.sprite.Sprite):
         self.sprinting_speed = 200  # Sprinting speed
 
         # Stamina variables
+        self.sprinting_bool = False # Boolean to check if character is sprinting or not
         self.max_stamina = 100  # Initial maximum stamina value
         self.stamina = self.max_stamina  # Current stamina value
         self.stamina_regen_rate = 10  # Stamina regeneration rate per second
@@ -54,11 +56,19 @@ class NPC(pygame.sprite.Sprite):
 
         self.max_distance = 32 # Maximum distance from the character
 
+        self.equip_weapon = False # Boolean to check if npc has equiped pistol or not
+        self.is_shooting = False  # Add this attribute
+
+        self.last_shot_time = 0  # Initialize the last shot time
+        self.shoot_cooldown = 1.0  # Cooldown time in seconds (1 second in this case)
+        self.prev_num_zombies = 0  # Store the previous number of zombies
+
     def import_assets(self):
         # Imports npc animations from sprite sheets
         self.animations = {
             'up': [], 'down': [], 'right': [], 'left': [],
             'up_idle': [], 'down_idle': [], 'right_idle': [], 'left_idle': [],
+            'up_shoot': [], 'down_shoot': [], 'right_shoot': [], 'left_shoot': [],
             'up_death': [], 'down_death': [], 'right_death': [], 'left_death': []
         }
         
@@ -69,6 +79,9 @@ class NPC(pygame.sprite.Sprite):
             },
             './assets/textures/npc/npc_idle.png': {
                 'rows': 4, 'cols': 2, 'animations': ['down_idle', 'up_idle', 'right_idle', 'left_idle']
+            },
+            './assets/textures/character/character_shoot.png': { # FIXME: Change this to npc_shoot.png once we have the sprite sheet
+                'rows': 4, 'cols': 4, 'animations': ['down_shoot', 'up_shoot', 'right_shoot', 'left_shoot']
             },
             './assets/textures/npc/npc_death.png': {
                 'rows': 4, 'cols': 4, 'animations': ['down_death', 'up_death', 'right_death', 'left_death']
@@ -111,30 +124,68 @@ class NPC(pygame.sprite.Sprite):
         distance_to_character = self.direction_to_character.length()
         # Reset the direction vector
         self.direction = pygame.math.Vector2(0,0)
-        # If the distance exceeds the max distance, set the direction vector
-        if distance_to_character > self.max_distance:
-            if self.direction_to_character.x < 0:
-                self.direction.x = -1
-                self.status = 'left'
-            elif self.direction_to_character.x > 0:
-                self.direction.x = 1
-                self.status = 'right'
-            if self.direction_to_character.y < 0:
-                self.direction.y = -1
-                if self.direction.x == 0:
-                    self.status = 'up'
-            elif self.direction_to_character.y > 0:
-                self.direction.y = 1
-                if self.direction.x == 0:
-                    self.status = 'down'
-
-            self.speed = self.walking_speed  # Set the speed to walking speed
+        if not self.is_shooting:  # Only follow character if not currently shooting
+            # If the distance exceeds the max distance, set the direction vector
+            if distance_to_character > self.max_distance:
+                if self.direction_to_character.x < 0:
+                    self.direction.x = -1
+                    self.status = 'left'
+                elif self.direction_to_character.x > 0:
+                    self.direction.x = 1
+                    self.status = 'right'
+                if self.direction_to_character.y < 0:
+                    self.direction.y = -1
+                    if self.direction.x == 0:
+                        self.status = 'up'
+                elif self.direction_to_character.y > 0:
+                    self.direction.y = 1
+                    if self.direction.x == 0:
+                        self.status = 'down'
+            
+                if self.character.sprinting_bool:  # If the character is sprinting, sprint
+                    self.sprinting_bool = True # Set sprinting_bool to True
+                    self.speed = self.sprinting_speed  # Set the speed to sprinting speed
+                else:
+                    self.sprinting_bool = False # Set sprinting_bool to False
+                    self.speed = self.walking_speed  # Set the speed to walking speed
         else:
-            self.speed = 0  # Stop moving if within the max distance
+            self.speed = 0  # Stop moving if shooting
+
+    def can_shoot(self, zombies):
+        current_time = pygame.time.get_ticks() / 1000.0  # Get the current time in seconds
+        can_shoot_now = current_time - self.last_shot_time >= self.shoot_cooldown  # Check if cooldown has passed   
+        alive_zombies = [zombie for zombie in zombies if zombie.is_alive()]  # List of alive zombies
+
+        # If the number of zombies has decreased, stop shooting
+        if len(alive_zombies) < self.prev_num_zombies:
+            self.is_shooting = False
+            self.equip_weapon = False
+            self.prev_num_zombies = len(alive_zombies)  # Update the stored number of zombies
+            return  # Exit the function
+
+        # Update the stored number of zombies
+        self.prev_num_zombies = len(alive_zombies)
+        closest_zombie = None
+        closest_distance = float('inf')
+        for zombie in alive_zombies:  # Now iterate over only alive zombies
+            distance_to_zombie = (zombie.pos - self.pos).length()
+            if distance_to_zombie <= 128 and distance_to_zombie < closest_distance:
+                closest_distance = distance_to_zombie
+                closest_zombie = zombie
+        if closest_zombie and can_shoot_now:
+            self.is_shooting = True
+            self.equip_weapon = True
+            self.shoot(closest_zombie.pos.x, closest_zombie.pos.y)
+            self.last_shot_time = current_time  # Update the last shot time
+        elif not closest_zombie:
+            self.is_shooting = False
+            self.equip_weapon = False
 
     def get_status(self):
         if self.direction.magnitude() == 0:
             self.status = self.status.split('_')[0] + '_idle'
+        if self.equip_weapon:
+            self.status = self.status.split('_')[0] + '_shoot'
         if self.death_bool:
             self.status = self.status.split('_')[0] + '_death'
 
@@ -168,9 +219,52 @@ class NPC(pygame.sprite.Sprite):
                 timer_thread = threading.Thread(target=self.delayed_kill) # Create a thread to kill the npc after 5 seconds
                 timer_thread.start() # Start the thread
 
+    def check_stamina(self, dt):
+        if self.sprinting_bool: # If sprinting, degenerate stamina
+            if self.direction.magnitude() > 0: # If moving, degenerate stamina
+                self.stamina -= self.stamina_degen_rate * dt * 1.25 # Degenerate stamina
+                if self.stamina <= 0: # If stamina is less than or equal to 0, set stamina to 0
+                    self.stamina = 0 # Set stamina to 0
+                    self.speed = self.walking_speed # Set speed to walking speed if stamina is 0 (out of stamina)
+            elif self.direction.magnitude() == 0 and self.stamina < self.max_stamina: # Check if not moving and stamina is less than max stamina
+                self.stamina += self.stamina_regen_rate * dt * 1.25 # Regenerate stamina
+                if self.stamina >= self.max_stamina: # If stamina is greater than or equal to max stamina, set stamina to max stamina
+                    self.stamina = self.max_stamina # Set stamina to max stamina
+        else:
+            self.stamina += self.stamina_regen_rate * dt * 1.25 # Regenerate stamina
+            if self.stamina >= self.max_stamina: # If stamina is greater than or equal to max stamina, set stamina to max stamina
+                self.stamina = self.max_stamina # Set stamina to max stamina
+
+    def shoot(self, target_x, target_y):
+        # Get the direction vector from NPC's position to target's position
+        direction = pygame.math.Vector2(target_x, target_y) - self.pos
+        # Normalize the direction vector to get a unit vector
+        normalized_direction = direction.normalize()
+        # Multiply the normalized direction by the bullet's speed to get the bullet's velocity
+        bullet_velocity = normalized_direction * 500  # Assuming the bullet speed is 500
+        Bullet(self.pos, bullet_velocity, self.groups()[0])  # Create a bullet
+
     def update(self, dt):
         self.follow_character()  # Update direction and speed to follow the character
         self.move(dt)  # Move the NPC
         self.get_status()  # Update the status (animation)
         self.animate(dt)  # Animate the NPC
-        self.check_health(dt)
+        self.check_health(dt) # Check health
+        self.check_stamina(dt) # Check stamina
+
+class Bullet(pygame.sprite.Sprite): # FIXME: Add bullet sprites to this classes using the above method.
+    def __init__(self, pos, velocity, group):
+        super().__init__(group)
+        self.velocity = velocity # Velocity of the bullet
+        image = pygame.image.load("assets/textures/character/bulletone.png")# Loads image for bullet
+        rotate_angle = math.atan(self.velocity.y/self.velocity.x) * 180 / math.pi - 90 # Calculates angle to rotate bullet by (in degrees)
+        self.image = pygame.transform.rotate(image, rotate_angle) # Sets sprite image to rotated bullet
+        self.rect = self.image.get_rect(center=pos) # Set the rect attribute of the bullet
+        self.pos = pygame.math.Vector2(pos) # Set the pos attribute of the bullet
+        self.z = LAYERS['bullet'] # Set the z attribute of the bullet
+
+    def update(self, dt):
+        self.pos += self.velocity * dt # Update the position of the bullet
+        self.rect.center = self.pos # Update the rect attribute of the bullet
+        if not MAP_BOUNDARY.colliderect(self.rect):  # Check against the map boundary instead of screen rect
+            self.kill() # Kill the bullet if it is outside the map boundary
