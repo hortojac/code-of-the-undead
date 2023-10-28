@@ -127,6 +127,9 @@ class Zombie(pygame.sprite.Sprite):
                     if self.direction.x == 0:
                         self.status = 'down'
 
+    def is_alive(self):
+        return not self.death_bool
+
     def kill_zombie(self, damage):
         self.health -= damage # Reduce the health of the zombie
         if self.health <= 0:
@@ -161,6 +164,7 @@ class Zombie(pygame.sprite.Sprite):
         self.rect.centery = round(self.pos.y) # Round the value before updating
 
     def update(self, dt):
+        self.is_alive() # Check if the zombie is alive
         self.follow_human() # Update direction and speed to follow the character
         if not self.death_bool:
             self.move(dt) # Only move if not in the death state
