@@ -173,12 +173,12 @@ class NPC(pygame.sprite.Sprite):
             if distance_to_zombie <= 128 and distance_to_zombie < closest_distance:
                 closest_distance = distance_to_zombie
                 closest_zombie = zombie
-        if closest_zombie and can_shoot_now:
+        if closest_zombie and can_shoot_now and self.character.equip_weapon:
             self.is_shooting = True
             self.equip_weapon = True
             self.shoot(closest_zombie.pos.x, closest_zombie.pos.y)
             self.last_shot_time = current_time  # Update the last shot time
-        elif not closest_zombie:
+        elif not closest_zombie or not self.character.equip_weapon:
             self.is_shooting = False
             self.equip_weapon = False
 
