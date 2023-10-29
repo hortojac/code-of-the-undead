@@ -118,40 +118,41 @@ class Character(pygame.sprite.Sprite):
         # Check for sprinting (SHIFT key)
         self.sprinting = keys[KEY_SPRINT]
         # Set the direction vector and status based on the keys pressed
-        if keys[KEY_LEFT]:
-            self.direction.x = -1
-            self.status = 'left'
-        elif keys[KEY_RIGHT]:
-            self.direction.x = 1
-            self.status = 'right'
-        if keys[KEY_UP]:
-            self.direction.y = -1
-            self.status = 'up'
-        elif keys[KEY_DOWN]:
-            self.direction.y = 1
-            self.status = 'down'
+        if not self.death_bool:
+            if keys[KEY_LEFT]:
+                self.direction.x = -1
+                self.status = 'left'
+            elif keys[KEY_RIGHT]:
+                self.direction.x = 1
+                self.status = 'right'
+            if keys[KEY_UP]:
+                self.direction.y = -1
+                self.status = 'up'
+            elif keys[KEY_DOWN]:
+                self.direction.y = 1
+                self.status = 'down'
 
-        # Event Loop
-        for event in pygame.event.get():        
-        # Check for user equiping weapon
-            if event.type == pygame.KEYDOWN:
-                if event.key == KEY_WEAPON:
-                    self.equip_weapon = not self.equip_weapon
-            # Check for user clicking mouse and equipped weapon
-            if event.type == pygame.MOUSEBUTTONDOWN and self.equip_weapon:
-                    if event.button == KEY_SHOOT:   # Check if mouse event is left click
-                        mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
-                        self.shoot(mousex, mousey) # Shoots bullet
+            # Event Loop
+            for event in pygame.event.get():        
+            # Check for user equiping weapon
+                if event.type == pygame.KEYDOWN:
+                    if event.key == KEY_WEAPON:
+                        self.equip_weapon = not self.equip_weapon
+                # Check for user clicking mouse and equipped weapon
+                if event.type == pygame.MOUSEBUTTONDOWN and self.equip_weapon:
+                        if event.button == KEY_SHOOT:   # Check if mouse event is left click
+                            mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
+                            self.shoot(mousex, mousey) # Shoots bullet
 
-        # Adjust speed based on sprinting state
-        if self.sprinting:
-            self.speed = self.sprinting_speed # Set speed to sprinting speed if sprinting
-            self.sprinting_bool = True # Set sprinting boolean to true if sprinting
-            if self.stamina == 0:
-                self.speed = self.walking_speed # Set speed to walking speed if stamina is 0 (out of stamina)
-        else:
-            self.speed = self.walking_speed # Set speed to walking speed if not sprinting
-            self.sprinting_bool = False # Set sprinting boolean to false if not sprinting
+            # Adjust speed based on sprinting state
+            if self.sprinting:
+                self.speed = self.sprinting_speed # Set speed to sprinting speed if sprinting
+                self.sprinting_bool = True # Set sprinting boolean to true if sprinting
+                if self.stamina == 0:
+                    self.speed = self.walking_speed # Set speed to walking speed if stamina is 0 (out of stamina)
+            else:
+                self.speed = self.walking_speed # Set speed to walking speed if not sprinting
+                self.sprinting_bool = False # Set sprinting boolean to false if not sprinting
 
     def get_status(self):
         if self.direction.magnitude() == 0:
