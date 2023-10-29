@@ -21,9 +21,9 @@ class SettingsMenu:
         self.origin = (0,0) # Define the origin
 
         # Fonts for display
-        self.title_font = pygame.font.SysFont(None, 96)
-        self.sub_title_font = pygame.font.SysFont(None, 48)
-        self.keybind_font = pygame.font.SysFont(None, 32)
+        self.title_font = pygame.font.SysFont('Arial', 96)
+        self.sub_title_font = pygame.font.SysFont('Arial', 48)
+        self.keybind_font = pygame.font.SysFont('Arial', 32)
 
         # Gather keybinds from settings in the order they are defined
         self.keybinds = []
@@ -44,8 +44,8 @@ class SettingsMenu:
         # Calculate the maximum length of key names for alignment
         self.max_key_name_length = max([len(k[0]) for k in self.keybinds])
 
-        self.exit_button = pygame.image.load("./assets/main_menu/exitbutton.png") # Load exit button png
-        self.highlighted_exit = pygame.image.load("./assets/main_menu/exitbutton_highlighted.png") # Load highlighted exit button
+        self.exit_button = pygame.image.load("./assets/main_menu/mainmenu_button.png") # Load exit button png
+        self.highlighted_exit = pygame.image.load("./assets/main_menu/mainmenu_button_highlighted.png") # Load highlighted exit button
         self.exit_button_width = self.exit_button.get_width() # Get width of the exit png
         self.exit_button_height = self.exit_button.get_height() # Get height of the exit png
         self.exit_button_pos = (SCREEN_WIDTH/2 - (self.exit_button_width/2), SCREEN_HEIGHT - (25 + self.exit_button_height)) # Define position of exit button (25 pix up and in middle)
