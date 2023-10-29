@@ -246,7 +246,8 @@ class NPC(pygame.sprite.Sprite):
         Projectile(self.pos, bullet_velocity, self.groups()[0])  # Create a bullet
 
     def update(self, dt):
-        self.follow_character()  # Update direction and speed to follow the character
+        if not self.death_bool:
+            self.follow_character()  # Update direction and speed to follow the character
         self.move(dt)  # Move the NPC
         self.get_status()  # Update the status (animation)
         self.animate(dt)  # Animate the NPC
