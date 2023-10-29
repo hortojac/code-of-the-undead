@@ -53,6 +53,8 @@ class Game:
                     if event.key == pygame.K_q and (event.mod & pygame.KMOD_CTRL):
                         pygame.quit()
                         sys.exit()
+                    elif event.key == pygame.K_ESCAPE:
+                        self.game_state = "Pause Menu"
 
             dt = self.clock.tick() / 1000.0
             # Draw the menu
@@ -60,10 +62,13 @@ class Game:
                 self.game_state = self.main_menu.run()
              # Draw the settings menu
             if self.game_state == "Settings":
-                self.game_state = self.settings_menu.run()
+                self.game_state = self.settings_menu.run(self.game_state)
             # Draw the map
             if self.game_state == "Play":
                 self.map.run(dt)
+            # Draw the pause menu
+            if self.game_state == "Pause Menu":
+                self.game_state = self.settings_menu.run(self.game_state)
             # Make the most recently drawn screen visible
             pygame.display.update()
 
