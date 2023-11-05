@@ -178,7 +178,9 @@ class MainMenu:
         if ((mouse_pos[0] > self.credits_button_pos[0]) and (mouse_pos[0] < (self.credits_button_pos[0] + self.credits_button_width))) and \
         ((mouse_pos[1] > self.credits_button_pos[1]) and (mouse_pos[1] < (self.credits_button_pos[1] + self.credits_button_height))):
             self.display_surface.blit(self.highlighted_credits, self.credits_button_pos) # Draws highlighted button over normal button if mouse is in its position
-            
+            if mouse_state[0] == True: # If left mouse button is clicked
+                return "Credits" # Returns Credits which is the game_state of "credits"
+
         # Checks position of mouse and if the left button is clicked
         if ((mouse_pos[0] > self.exit_button_pos[0]) and (mouse_pos[0] < (self.exit_button_pos[0] + self.exit_button_width))) and \
         ((mouse_pos[1] > self.exit_button_pos[1]) and (mouse_pos[1] < (self.exit_button_pos[1] + self.exit_button_height))):

@@ -21,9 +21,9 @@ class SettingsMenu:
         self.origin = (0,0) # Define the origin
 
         # Fonts for display
-        self.title_font = pygame.font.SysFont('Arial', 96)
-        self.sub_title_font = pygame.font.SysFont('Arial', 48)
-        self.keybind_font = pygame.font.SysFont('Arial', 32)
+        self.title_font = pygame.font.Font(PIXEL_FONT_PATH, 64)
+        self.sub_title_font = pygame.font.Font(PIXEL_FONT_PATH, 48)
+        self.keybind_font = pygame.font.SysFont(PIXEL_FONT_PATH, 48)
 
         # Gather keybinds from settings in the order they are defined
         self.keybinds = []
@@ -68,10 +68,13 @@ class SettingsMenu:
         self.display_surface.fill((10, 10, 10))  # Fills the screen with dark grey
 
         # Display title
-        title = self.title_font.render("Settings", True, (0, 224, 11))
+        title = self.title_font.render("SETTINGS", True, (0, 224, 11))
         self.display_surface.blit(title, (SCREEN_WIDTH/2 - title.get_width()/2, 25))
 
-        # Display subtitle "Default Key Bindings"
+        # Underline the sub title's font
+        self.sub_title_font.set_underline(True)  # Turn on underline
+
+        # Display subtitle "Key Bindings"
         sub_title = self.sub_title_font.render("Default Key Bindings", True, (255, 255, 255))
         self.display_surface.blit(sub_title, (SCREEN_WIDTH/2 - sub_title.get_width()/2, 25 + title.get_height() + 50))
 
@@ -132,8 +135,8 @@ class SettingsMenu:
             ((mouse_pos[1] > self.exit_button_pos[1]) and (mouse_pos[1] < (self.exit_button_pos[1] + self.exit_button_height))):
                 self.display_surface.blit(self.highlighted_exit, self.exit_button_pos) # Draws highlighted button over normal button if mouse is in its position
                 if mouse_state[0] == True: # If left button is clicked it quits and exits the game
-                    pygame.quit()
-                    sys.exit()
+                    pygame.time.wait(500)
+                    return "Main Menu"
 
             # Check position of mouse and if mouse is clicked to see if and what button is pressed
             if ((mouse_pos[0] > self.play_button_pos[0]) and (mouse_pos[0] < (self.play_button_pos[0] + self.play_button_width))) and \

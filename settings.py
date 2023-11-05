@@ -18,6 +18,9 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 TITLE_SIZE = 64
 
+# Font path
+PIXEL_FONT_PATH = "./Game_Font/PressStart2P-Regular.ttf"
+
 # Overlay size and position
 OVERLAY_POSITIONS = {
     'Ranged_Weapon': {
