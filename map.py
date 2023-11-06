@@ -12,9 +12,6 @@ License: MIT License
 # Imports
 from typing import List, Optional
 import pygame
-import math
-import openai
-import os
 from pygame.rect import Rect
 from pygame.surface import Surface
 from settings import *
@@ -23,9 +20,6 @@ from zombie import Zombie
 from npc import NPC 
 from sprites import Generic
 from projectile import Projectile
-
-# OpenAI API key
-openai_api_key = os.environ.get('OPENAI_API_KEY')
 
 class Map:
     def __init__(self):
@@ -49,7 +43,7 @@ class Map:
         Generic(pos=(0, 0), surf=pygame.image.load(
             './assets/Test_map/map.png').convert_alpha(), groups=self.all_sprites, z=LAYERS['background'])
         self.character = Character(((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)), self.all_sprites)
-        self.npc = NPC(((SCREEN_WIDTH // 2 + 100), (SCREEN_HEIGHT // 2 + 200)), self.all_sprites, self.character)
+        self.npc = NPC(((SCREEN_WIDTH // 2 + 100), (SCREEN_HEIGHT // 2 + 200)), self.all_sprites)
         for i in range(2):
             zombie_position = (i * 500, 0)
             zombie = Zombie(zombie_position, self.all_sprites, self.character, self.npc, self.display_surface)
@@ -81,9 +75,9 @@ class Map:
         self.all_sprites.custom_draw(self.character) # Draw character on top of map
         self.character.draw_stamina_bar(self.display_surface, dt) # Draw stamina bar
         self.character.draw_health_bar(self.display_surface, dt) # Draw health bar
+        self.npc.update_game_state(self.character, self.zombies) # update game state for NPC
         self.all_sprites.update(dt) # update all sprites
-        self.npc.can_shoot(self.zombies) # Check if NPC can shoot
-
+        
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()

@@ -13,15 +13,19 @@ License: MIT License
 import pygame
 import threading
 import time
-import math
+import openai
+import os
+import concurrent.futures
 from settings import *
 from projectile import Projectile
 
+# OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 class NPC(pygame.sprite.Sprite):
-    def __init__(self, pos, group, character):
+    def __init__(self, pos, group):
         super().__init__(group)
         self.camera_group = group
-        self.character = character  # Store a reference to the character
 
         # Call the import_assets method to import all the animations
         self.import_assets()
@@ -41,28 +45,29 @@ class NPC(pygame.sprite.Sprite):
         self.sprinting_speed = 200  # Sprinting speed
 
         # Stamina variables
-        self.sprinting_bool = False # Boolean to check if character is sprinting or not
+        self.sprinting_bool = False # Boolean to check if npc is sprinting or not
         self.max_stamina = 100  # Initial maximum stamina value
         self.stamina = self.max_stamina  # Current stamina value
         self.stamina_regen_rate = 10  # Stamina regeneration rate per second
         self.stamina_degen_rate = 20  # Stamina degeneration rate per second
 
         # Health variables
-        self.death_bool = False # Boolean to check if character is dead or not
-        self.health_bool = True # Boolean to check if character is losing health or not
+        self.death_bool = False # Boolean to check if npc is dead or not
+        self.health_bool = True # Boolean to check if npc is losing health or not
         self.max_health = 100  # Initial maximum health value
         self.health = self.max_health  # Current health value
         self.health_regen_rate = 1  # Health regeneration rate per second
         self.health_degen_rate = 25  # Health degeneration rate per second
 
-        self.max_distance = 32 # Maximum distance from the character
-
         self.equip_weapon = False # Boolean to check if npc has equiped pistol or not
-        self.is_shooting = False  # Add this attribute
+        self.is_shooting = False # Boolean to check if npc is shooting or not
 
-        self.last_shot_time = 0  # Initialize the last shot time
-        self.shoot_cooldown = 0.5  # Cooldown time in seconds (1 second in this case)
-        self.prev_num_zombies = 0  # Store the previous number of zombies
+        self.max_distance = 32  # Maximum distance to the character
+
+        self.game_state = {}  # Dictionary to hold the game state information
+        self.nearby_zombies = []  # List to hold the positions of nearby zombies
+
+        self.agent = GameAgent(self)  # Pass the NPC instance to GameAgent
 
     def import_assets(self):
         # Imports npc animations from sprite sheets
@@ -118,69 +123,28 @@ class NPC(pygame.sprite.Sprite):
                 self.frame_index = 0
         self.image = self.animations[self.status][int(self.frame_index)]
 
-    def follow_character(self):
-        # Get the direction vector to the character
-        self.direction_to_character = self.character.pos - self.pos
-        # Calculate the distance to the character
-        distance_to_character = self.direction_to_character.length()
-        # Reset the direction vector
-        self.direction = pygame.math.Vector2(0,0)
+    def move_towards_character(self, dt):
+        direction = self.character.pos - self.pos
+        distance_to_character = direction.length()
+
         if not self.is_shooting:  # Only follow character if not currently shooting
-            # If the distance exceeds the max distance, set the direction vector
             if distance_to_character > self.max_distance:
-                if self.direction_to_character.x < 0:
-                    self.direction.x = -1
-                    self.status = 'left'
-                elif self.direction_to_character.x > 0:
-                    self.direction.x = 1
-                    self.status = 'right'
-                if self.direction_to_character.y < 0:
-                    self.direction.y = -1
-                    if self.direction.x == 0:
-                        self.status = 'up'
-                elif self.direction_to_character.y > 0:
-                    self.direction.y = 1
-                    if self.direction.x == 0:
-                        self.status = 'down'
-            
-                if self.character.sprinting_bool:  # If the character is sprinting, sprint
-                    self.sprinting_bool = True # Set sprinting_bool to True
-                    self.speed = self.sprinting_speed  # Set the speed to sprinting speed
+                self.direction = direction.normalize()  # Normalize the direction
+                self.speed = self.sprinting_speed if self.sprinting_bool and self.stamina > 0 else self.walking_speed
+                
+                # Set status based on direction
+                if abs(self.direction.x) > abs(self.direction.y):
+                    self.status = 'right' if self.direction.x > 0 else 'left'
                 else:
-                    self.sprinting_bool = False # Set sprinting_bool to False
-                    self.speed = self.walking_speed  # Set the speed to walking speed
+                    self.status = 'down' if self.direction.y > 0 else 'up'
+                
+                # Apply movement
+                self.pos += self.direction * self.speed * dt
+                self.rect.center = round(self.pos.x), round(self.pos.y)
+            else:
+                self.speed = 0  # Stop moving if within the max distance
         else:
             self.speed = 0  # Stop moving if shooting
-
-    def can_shoot(self, zombies):
-        current_time = pygame.time.get_ticks() / 1000.0  # Get the current time in seconds
-        can_shoot_now = current_time - self.last_shot_time >= self.shoot_cooldown  # Check if cooldown has passed   
-        alive_zombies = [zombie for zombie in zombies if zombie.is_alive()]  # List of alive zombies
-
-        # If the number of zombies has decreased, stop shooting
-        if len(alive_zombies) < self.prev_num_zombies:
-            self.is_shooting = False
-            self.equip_weapon = False
-            self.prev_num_zombies = len(alive_zombies)  # Update the stored number of zombies
-            return  # Exit the function
-
-        # Update the stored number of zombies
-        self.prev_num_zombies = len(alive_zombies)
-        closest_zombie = None
-        closest_distance = float('inf')
-        for zombie in alive_zombies:  # Now iterate over only alive zombies
-            distance_to_zombie = (zombie.pos - self.pos).length()
-            if distance_to_zombie <= 128 and distance_to_zombie < closest_distance:
-                closest_distance = distance_to_zombie
-                closest_zombie = zombie
-        if closest_zombie and can_shoot_now and self.character.equip_weapon:
-            self.is_shooting = True
-            self.equip_weapon = True
-            self.shoot(closest_zombie.pos.x, closest_zombie.pos.y)
-            self.last_shot_time = current_time  # Update the last shot time
-        elif not closest_zombie or not self.character.equip_weapon:
-            self.is_shooting = False
-            self.equip_weapon = False
 
     def get_status(self):
         if self.direction.magnitude() == 0:
@@ -189,19 +153,6 @@ class NPC(pygame.sprite.Sprite):
             self.status = self.status.split('_')[0] + '_shoot'
         if self.death_bool:
             self.status = self.status.split('_')[0] + '_death'
-
-    def move(self, dt):
-        # Normalize the direction vector
-        if self.direction.magnitude() > 0:
-            self.direction = self.direction.normalize()
-
-        # Horizontal movement
-        self.pos.x += self.direction.x * self.speed * dt
-        self.rect.centerx = round(self.pos.x)  # Round the value before updating
-
-        # Vertical movement
-        self.pos.y += self.direction.y * self.speed * dt
-        self.rect.centery = round(self.pos.y)  # Round the value before updating
 
     def delayed_kill(self):
             time.sleep(5) # Wait 5 seconds
@@ -236,7 +187,9 @@ class NPC(pygame.sprite.Sprite):
             if self.stamina >= self.max_stamina: # If stamina is greater than or equal to max stamina, set stamina to max stamina
                 self.stamina = self.max_stamina # Set stamina to max stamina
 
-    def shoot(self, target_x, target_y):
+    def shoot(self, target_x, target_y): #FIXME: Shooting a bullet doesn't get drawn on the screen right now
+        print("NPC is shooting")
+        print(target_x, target_y)
         # Get the direction vector from NPC's position to target's position
         direction = pygame.math.Vector2(target_x, target_y) - self.pos
         # Normalize the direction vector to get a unit vector
@@ -244,11 +197,116 @@ class NPC(pygame.sprite.Sprite):
         # Multiply the normalized direction by the bullet's speed to get the bullet's velocity
         bullet_velocity = normalized_direction * 500  # Assuming the bullet speed is 500
         Projectile(self.pos, bullet_velocity, self.groups()[0])  # Create a bullet
+        self.is_shooting = False # Set is_shooting to false after shooting
+        self.equip_weapon = False # Set equip_weapon to false after shooting
+
+    def get_nearby_zombies(self, zombies, max_distance=128):
+        for zombie in zombies:
+            distance = self.pos.distance_to(zombie.pos)
+            if distance <= max_distance:
+                self.nearby_zombies.append(zombie.pos)
+
+    def update_game_state(self, character, zombies):
+        self.character = character
+        self.get_nearby_zombies(zombies) # Get the positions of nearby zombies
+        # Collect game state information
+        self.game_state = {
+            'npc_health': self.health,
+            'npc_stamina': self.stamina,
+            'npc_position': self.pos,
+            'character_position': self.character.pos,
+            'character_health': self.character.health,
+            'zombie_positions': self.nearby_zombies
+        }
+
+    def execute_actions(self, actions, dt): #FIXME: Shooting is buggy right now
+        # Execute the actions returned by the GameAgent
+        for action in actions:
+            if action['type'] == 'move':
+                # Move to the character's position
+                self.move_towards_character(dt)
+            elif action['type'] == 'shoot':
+                self.equip_weapon = True # Equip weapon
+                self.is_shooting = True # Set is_shooting to true
+                # Shoot the zombie at its position
+                zombie_position = self.nearby_zombies[0]
+                target_x, target_y = zombie_position.x, zombie_position.y
+                self.shoot(target_x, target_y)
+                self.equip_weapon = True # Equip weapon
+                self.is_shooting = True # Set is_shooting to true
 
     def update(self, dt):
-        self.follow_character()  # Update direction and speed to follow the character
-        self.move(dt)  # Move the NPC
         self.get_status()  # Update the status (animation)
         self.animate(dt)  # Animate the NPC
         self.check_health(dt) # Check health
         self.check_stamina(dt) # Check stamina
+        
+        # Check if the OpenAI API should be called
+        if self.agent.should_call_openai_api():
+            actions = self.agent.act()  # Get actions from the GameAgent
+            self.execute_actions(actions, dt)  # Execute the actions
+        else:
+            self.move_towards_character(dt)  # Move towards the character
+
+class GameAgent:
+    def __init__(self, npc):
+        self.npc = npc
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        self.previous_zombie_positions = []
+
+    def should_call_openai_api(self):
+        if self.npc.game_state['zombie_positions'] == None:
+            return False
+        else:
+            # Check if this is the first call or if there's a new zombie in range
+            if len(self.npc.game_state['zombie_positions']) != len(self.previous_zombie_positions):
+                self.previous_zombie_positions = self.npc.game_state['zombie_positions']
+                return True
+
+    def act(self):
+        # Convert current_game_state to a string or other format suitable for your language model
+        formatted_state = self.format_game_state()
+        # Submit the OpenAI API call to the executor
+        future = self.executor.submit(self.get_language_model_response, formatted_state)
+        # Do other work here, and then wait for the API call to complete if necessary
+        response = future.result()
+        # Parse the response to get the actions for the NPC
+        actions = self.parse_response(response)
+        return actions
+
+    def format_game_state(self):
+        # Convert current_game_state to a format suitable for your language model
+        formatted_state = f"""
+        NPC Health: {self.npc.game_state['npc_health']}
+        NPC Stamina: {self.npc.game_state['npc_stamina']}
+        NPC Position: {self.npc.game_state['npc_position']}
+        Character Health: {self.npc.game_state['character_health']}
+        Character Position: {self.npc.game_state['character_position']}
+        Zombie Positions: {self.npc.game_state['zombie_positions']}
+        """
+        return formatted_state
+
+    def get_language_model_response(self, formatted_state):
+        # Send formatted_state to your language model and return the response
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a npc in a zombie apocalypse. Using the Game state information provided. Do you move to the character or do you shoot the zombie? Reply with 'move' or 'shoot'"},
+                    {"role": "user", "content": formatted_state},
+                ],
+                max_tokens=50
+            )
+            print(response)
+            return response.choices[0].message['content'] if response.choices else ""
+        except openai.error.OpenAIError as e:
+            print(f"An error occurred: {e}")
+            return ""
+
+    def parse_response(self, response):
+        actions = []
+        if "move" in response:
+            actions.append({'type': 'move', 'target': 'character'})
+        elif "shoot" in response:
+            actions.append({'type': 'shoot', 'target': 'zombie'})
+        return actions
