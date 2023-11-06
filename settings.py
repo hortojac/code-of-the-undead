@@ -50,6 +50,7 @@ KEY_RIGHT = pygame.K_d  # Move right
 KEY_SPRINT = pygame.K_LSHIFT  # Sprint
 
 KEY_WEAPON = pygame.K_e # Equip weapon
+KEY_SWAP = pygame.K_q # Switch weapons
 KEY_SHOOT = 1 # Shoot weapon
 
 # Define Layers for the game

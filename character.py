@@ -13,6 +13,7 @@ License: MIT License
 import pygame
 import threading
 import time
+import random
 from settings import *
 from projectile import Projectile
 
@@ -56,6 +57,11 @@ class Character(pygame.sprite.Sprite):
 
         self.talking_with_npc = False # Boolean to check if character is talking with an NPC or not
         self.equip_weapon = False # Boolean to check if character has equiped pistol or not
+
+        # Weapon Variable
+        self.weapons = ['pistol','shotgun','smg']
+        self.equipped = 'pistol'
+        self.equipnum = 0
 
     def import_assets(self):
         # Imports character animations from sprite sheets
@@ -138,11 +144,20 @@ class Character(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN:
                     if event.key == KEY_WEAPON:
                         self.equip_weapon = not self.equip_weapon
-                # Check for user clicking mouse and equipped weapon
+                    if event.key == KEY_SWAP:   # Checks for weapon swap button press
+                        self.equipnum += 1  # Increments equip number
+                        self.equipped = self.weapons[self.equipnum % 3] # Switches equipped weapon
                 if event.type == pygame.MOUSEBUTTONDOWN and self.equip_weapon:
-                        if event.button == KEY_SHOOT:   # Check if mouse event is left click
+                    mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
+                    if self.equipped == 'pistol':
+                        self.shoot(mousex, mousey, 'pistol') # Shoots bullet
+                    if self.equipped == 'shotgun':
+                        self.shoot(mousex, mousey, 'shotgun') # Shoots bullet
+            # Check for user clicking mouse and equipped weapon
+            if pygame.mouse.get_pressed()[0] and self.equip_weapon and self.equipped == 'smg':
+                        if pygame.time.get_ticks() % 50 == 0: # limits fire rate
                             mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
-                            self.shoot(mousex, mousey) # Shoots bullet
+                            self.shoot(mousex, mousey, 'smg') # Shoots bullet
 
             # Adjust speed based on sprinting state
             if self.sprinting:
@@ -240,13 +255,23 @@ class Character(pygame.sprite.Sprite):
         # Draw the current health bar (red), accounting for Health text size (20) and padding (10)
         pygame.draw.rect(display_surface, (255, 0, 0), (self.health_bar_x, (self.health_bar_y + 30), self.current_health_width, self.health_bar_height))
 
-    def shoot(self, mousex, mousey):
+    def shoot(self, mousex, mousey, type):
         camera_offset = self.camera_group.offset # Get the camera offset
         world_mouse_pos = pygame.math.Vector2(mousex, mousey) + camera_offset # Get the world mouse position
-        direction = world_mouse_pos - self.pos # Get the direction vector
-        normalized_direction = direction.normalize() # Normalize the direction vector
-        bullet_velocity = normalized_direction * 500 # Set the velocity of the bullet
-        Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a bullet
+        if type == 'pistol' or type == 'smg':
+            direction = world_mouse_pos - self.pos # Get the direction vector
+            normalized_direction = direction.normalize() # Normalize the direction vector
+            bullet_velocity = normalized_direction * 500 # Set the velocity of the bullet
+            Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a bullet
+        elif type == 'shotgun':
+            direction = world_mouse_pos - self.pos
+            normalized_direction = direction.normalize()
+            for pellet in range(5): # Fires 5 pellets
+                 randx = normalized_direction[0] + (random.randint(-25,25)/ 100) # randomizes direction of pellet
+                 randy = normalized_direction[1] + (random.randint(-25,25)/ 100)
+                 bullet_velocity = pygame.math.Vector2(randx, randy) * 500
+                 Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a pellet
+                 
 
     def update(self, dt):
         self.input() # Get input from the user
