@@ -16,9 +16,12 @@ import time
 import openai
 import os
 import concurrent.futures
+from dotenv import load_dotenv
 from settings import *
 from projectile import Projectile
 
+# Load the OpenAI API key from the .env file
+load_dotenv()
 # OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
