@@ -18,9 +18,10 @@ from settings import *
 from projectile import Projectile
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, pos, group):
+    def __init__(self, pos, group, walls):
         super().__init__(group)
         self.camera_group = group
+        self.walls = walls#hitboxes of the walls of the map- will need to pass these differently most likely
         self.font = pygame.font.SysFont('Arial', 20) # Font for the stamina and health text
 
         # Call the import_assets method to import all the animations
@@ -185,10 +186,16 @@ class Character(pygame.sprite.Sprite):
         # Horizontal movement
         self.pos.x += self.direction.x * self.speed * dt
         self.rect.centerx = round(self.pos.x)  # Round the value before updating
+        if self.rect.collidelist(self.walls) != -1:#undo movement if collide with a wall
+            self.pos.x -= self.direction.x * self.speed * dt
+            self.rect.centerx = round(self.pos.x)
 
         # Vertical movement
         self.pos.y += self.direction.y * self.speed * dt
         self.rect.centery = round(self.pos.y)  # Round the value before updating
+        if self.rect.collidelist(self.walls) != -1: #undo the movement if collide with a wall
+            self.pos.y -= self.direction.y * self.speed * dt
+            self.rect.centery = round(self.pos.y)
 
     def draw_stamina_bar(self, display_surface, dt):
         if self.sprinting_bool: # If sprinting, degenerate stamina
