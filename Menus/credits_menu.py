@@ -11,8 +11,6 @@ License: MIT License
 
 # Imports
 import pygame
-import sys
-import inspect
 from settings import *
 
 class CreditsMenu:

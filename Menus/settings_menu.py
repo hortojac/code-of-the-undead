@@ -136,7 +136,7 @@ class SettingsMenu:
                 self.display_surface.blit(self.highlighted_exit, self.exit_button_pos) # Draws highlighted button over normal button if mouse is in its position
                 if mouse_state[0] == True: # If left button is clicked it quits and exits the game
                     pygame.time.wait(500)
-                    return "Main Menu"
+                    return "Quit" # Returns Quit which is the game_state of "quitting"
 
             # Check position of mouse and if mouse is clicked to see if and what button is pressed
             if ((mouse_pos[0] > self.play_button_pos[0]) and (mouse_pos[0] < (self.play_button_pos[0] + self.play_button_width))) and \
