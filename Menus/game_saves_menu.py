@@ -22,11 +22,13 @@ class GameSavesMenu:
 
         self.game_save_directory = "./Game_Saves" # Define the game save directory
         self.game_saves = [] # List of game saves
+        self.game_saves_dates = [] # List of game save dates
         self.save_buttons = [] # List of save buttons
         self.highlighted_save_buttons = [] # List of highlighted save buttons
 
         # Fonts for display
         self.title_font = pygame.font.Font(PIXEL_FONT_PATH, 64)
+        self.text_font = pygame.font.Font(PIXEL_FONT_PATH, 16)
 
         self.mainmenu_button = pygame.image.load("./assets/main_menu/mainmenu_button.png") # Load exit button png
         self.highlighted_mainmenu = pygame.image.load("./assets/main_menu/mainmenu_button_highlighted.png") # Load highlighted exit button
@@ -54,17 +56,43 @@ class GameSavesMenu:
             save_path = os.path.join(self.game_save_directory, f"GameSave{i}.json")
             if os.path.exists(save_path):
                 self.game_saves.append(f"GameSave{i}")
+                self.parse_game_save_date(f"GameSave{i}")
+
+    def parse_game_save_date(self, save_name):
+        save_path = f"./Game_Saves/{save_name}.json"
+
+        # Load the JSON data from the file
+        with open(save_path, 'r') as json_file:
+            save_data = json.load(json_file)
+
+        if 'saveDate' in save_data:
+            save_date = save_data['saveDate']
+            
+            # Extract date and time components
+            year = save_date.get('year', 'YYYY')
+            month = save_date.get('month', 'MM')
+            day = save_date.get('day', 'DD')
+            hour = save_date.get('hour', 'HH')
+            minute = save_date.get('minute', 'MM')
+
+            # Format date and time as "MM/DD/YYYY - HOUR:MINUTE"
+            formatted_date_time = f"{month}/{day}/{year} - {hour}:{minute}"
+            # Add the formatted date and time to the list of game save dates
+            self.game_saves_dates.append(formatted_date_time)
 
     def create_new_game_save(self):
-        # Increment the save file number
-        new_save_number = len(self.game_saves) + 1
-        new_save_name = f"GameSave{new_save_number}"
-        save_path = os.path.join(self.game_save_directory, f"{new_save_name}.json")
-        game_save = {}
-        with open(save_path, "w") as file:
-            json.dump(game_save, file)
-        self.game_saves.append(new_save_name)
-        return new_save_name
+        if len(self.game_saves) < 5:
+            # Increment the save file number
+            new_save_number = len(self.game_saves) + 1
+            new_save_name = f"GameSave{new_save_number}"
+            save_path = os.path.join(self.game_save_directory, f"{new_save_name}.json")
+            game_save = {}
+            with open(save_path, "w") as file:
+                json.dump(game_save, file)
+            self.game_saves.append(new_save_name)
+            return new_save_name
+        else:
+            return None  # Return None if the maximum number of saves has been reached
 
     # This function is called over and over in main when game_state is "Settings"
     def run(self):
@@ -88,13 +116,17 @@ class GameSavesMenu:
             # Extract the save number from the save name (e.g., "GameSave1" -> 1)
             save_number = int(save.replace("GameSave", "")) - 1
 
+            date_and_time = self.text_font.render("Date and Time Saved:", True, (255, 255, 255))
+
             # Calculate the position for each save button
-            save_button_x = SCREEN_WIDTH / 3 - self.save_buttons[save_number].get_width() / 2
+            save_button_x = self.save_buttons[save_number].get_width() + 72
             save_button_y = 25 + 64 + 25 + i * (self.save_buttons[save_number].get_height() + 10)
             save_button_pos = (save_button_x, save_button_y)
 
             # Display the save button
             self.display_surface.blit(self.save_buttons[save_number], save_button_pos)
+            self.display_surface.blit(date_and_time, (save_button_pos[0] + 320, save_button_pos[1] + 15))
+            self.display_surface.blit(self.text_font.render(self.game_saves_dates[i], True, (255, 255, 255)), (save_button_pos[0] + 320, save_button_pos[1] + 36))
 
             # Check if the mouse is over the button and if it's clicked
             if ((mouse_pos[0] > save_button_pos[0]) and (mouse_pos[0] < (save_button_pos[0] + self.save_buttons[save_number].get_width()))) and \
@@ -119,7 +151,11 @@ class GameSavesMenu:
             if mouse_state[0] == True: # If left mouse button is clicked
                 pygame.time.wait(500)
                 save_name = self.create_new_game_save() # Create a new game save
-                return "Play", save_name # Return the game state and the name of the new game save
+                if save_name != None:
+                    return "Play", save_name # Return the game state and the name of the new game save
+                else:
+                    print("Maximum number of saves reached")
+                    return "Game Saves Menu", ""
             else:
                 return "Game Saves Menu", "" # Return the game state and an empty string
         else:

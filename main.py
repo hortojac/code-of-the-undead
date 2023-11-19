@@ -90,6 +90,7 @@ class Game:
         self.map.write_game_save(self.save_name)
         del self.map
         self.map_has_been_loaded = False
+        self.game_saves_menu.parse_game_save_date(self.save_name)
         self.draw_game_saves_menu()
 
     def run_game(self):
