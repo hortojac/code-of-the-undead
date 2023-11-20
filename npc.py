@@ -2,7 +2,7 @@
 Description: This script contains the NPC class for the game which is used to create NPCs.
 Author: Seth Daniels, Nico Gatapia, Jacob Horton, Elijah Toliver, Gilbert Vandegrift
 Date Created: October 08, 2023
-Date Modified: October 25, 2023
+Date Modified: November 19, 2023
 Version: Development
 Python Version: 3.11.5
 Dependencies: pygame
@@ -89,7 +89,7 @@ class NPC(pygame.sprite.Sprite):
             './assets/textures/npc/npc_idle.png': {
                 'rows': 4, 'cols': 2, 'animations': ['down_idle', 'up_idle', 'right_idle', 'left_idle']
             },
-            './assets/textures/character/character_shoot.png': { # FIXME: Change this to npc_shoot.png once we have the sprite sheet
+            './assets/textures/npc/npc_shoot.png': {
                 'rows': 4, 'cols': 4, 'animations': ['down_shoot', 'up_shoot', 'right_shoot', 'left_shoot']
             },
             './assets/textures/npc/npc_death.png': {
