@@ -19,8 +19,8 @@ from pygame.surface import Surface
 from settings import *
 from character import Character
 from zombie import Zombie
-from npc import NPC 
-from sprites import Generic
+from npc import NPC
+from sprites import AttackSprite, Generic
 from projectile import Projectile
 
 class Map():
@@ -59,7 +59,8 @@ class Map():
         self.npc = NPC(((SCREEN_WIDTH // 2 + 100), (SCREEN_HEIGHT // 2 + 200)), self.all_sprites)
         for i in range(2):
             zombie_position = (i * 500, 0)
-            zombie = Zombie(zombie_position, self.all_sprites, self.character, self.npc, self.display_surface)
+            zombie = Zombie(zombie_position, self.all_sprites,
+                            self.character, self.npc, self.display_surface)
             self.zombies.append(zombie)
 
     def load_game_save(self, save_name):
@@ -169,15 +170,19 @@ class Map():
         # Fill the display surface with a background color (white)
         self.display_surface.fill('white')
         # Check collision between character and each living zombie
-        collision_with_character = any(zombie.is_alive() and self.character.rect.colliderect(zombie.rect) for zombie in self.zombies)
+        collision_with_character = any(zombie.is_alive(
+        ) and self.character.rect.colliderect(zombie.rect) for zombie in self.zombies)
         self.character.health_bool = not collision_with_character
         # Check collision between npc and each living zombie
-        collision_with_npc = any(zombie.is_alive() and self.npc.rect.colliderect(zombie.rect) for zombie in self.zombies)
+        collision_with_npc = any(zombie.is_alive() and self.npc.rect.colliderect(
+            zombie.rect) for zombie in self.zombies)
         self.npc.health_bool = not collision_with_npc
+
         # Check if living zombies are attacking the character or NPC
         for zombie in self.zombies:
             if zombie.is_alive():
-                zombie.attack_bool = self.character.rect.colliderect(zombie.rect) or self.npc.rect.colliderect(zombie.rect)
+                zombie.attack_bool = self.character.rect.colliderect(
+                    zombie.rect) or self.npc.rect.colliderect(zombie.rect)
 
         # Check collision between bullet and each zombie
         for bullet in self.all_sprites.sprites():
@@ -186,6 +191,12 @@ class Map():
                     if zombie.is_alive() and zombie.rect.colliderect(bullet.rect):
                         zombie.kill_zombie(2)
                         bullet.kill()
+        # Check collision between melee and zombie
+        for melee in self.all_sprites.sprites():
+            if isinstance(melee, AttackSprite):
+                for zombie in self.zombies:
+                    if zombie.is_alive() and zombie.rect.colliderect(melee.rect):
+                        zombie.kill_zombie(.1)
 
         # Draw all sprites on top of the grid
         self.all_sprites.custom_draw(self.character) # Draw character on top of map
@@ -205,11 +216,11 @@ class CameraGroup(pygame.sprite.Group):
         self.half_h = self.display_surface.get_size()[1] // 2
 
     def center_target_camera(self, target):
-        self.offset.x = target.rect.centerx - self.half_w 
+        self.offset.x = target.rect.centerx - self.half_w
         self.offset.y = target.rect.centery - self.half_h
 
     def custom_draw(self, character):
-        self.center_target_camera(character) # Center camera on player
+        self.center_target_camera(character)  # Center camera on player
 
         # Active elements
         for layer in LAYERS.values():
@@ -217,4 +228,3 @@ class CameraGroup(pygame.sprite.Group):
                 if sprite.z == layer:
                     offset_pos = sprite.rect.topleft - self.offset
                     self.display_surface.blit(sprite.image, offset_pos)
-

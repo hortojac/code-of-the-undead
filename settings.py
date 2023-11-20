@@ -36,7 +36,7 @@ OVERLAY_POSITIONS = {
         'size': (200, 20)  # (width, height)
     },
     'Health': {
-        'position': (10, 70), # (x, y)
+        'position': (10, 70),  # (x, y)
         'size': (200, 20)  # (width, height)
     },
 }
@@ -49,15 +49,16 @@ KEY_RIGHT = pygame.K_d  # Move right
 
 KEY_SPRINT = pygame.K_LSHIFT  # Sprint
 
-KEY_WEAPON = pygame.K_e # Equip weapon
+KEY_WEAPON = pygame.K_e  # Equip weapon
+KEY_ATTACK = pygame.K_SPACE  # Attack
+KEY_SHOOT = 1  # Shoot weapon
 KEY_SWAP = pygame.K_q # Switch weapons
-KEY_SHOOT = 1 # Shoot weapon
 
 # Define Layers for the game
 LAYERS = {
     'background': 0,
     'player': 1,
-    'bullet' : 1,
+    'bullet': 1,
     'zombie': 1,
     'npc': 1,
     'foreground': 2,
@@ -65,4 +66,4 @@ LAYERS = {
     'rain': 4,
 }
 
-MAP_BOUNDARY = pygame.Rect(0, 0, 1387, 872) # HACK: Hard-coded map boundary
+MAP_BOUNDARY = pygame.Rect(0, 0, 1387, 872)  # HACK: Hard-coded map boundary
