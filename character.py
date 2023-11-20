@@ -13,17 +13,18 @@ License: MIT License
 import pygame
 import threading
 import time
+import random
 from settings import *
 from projectile import Projectile
 from sprites import AttackSprite
 
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, pos, group):
+    def __init__(self, pos, group, walls):
         super().__init__(group)
         self.camera_group = group
-        # Font for the stamina and health text
-        self.font = pygame.font.SysFont('Arial', 20)
+        self.walls = walls#hitboxes of the walls of the map- will need to pass these differently most likely
+        self.font = pygame.font.SysFont('Arial', 20) # Font for the stamina and health text
 
         # Call the import_assets method to import all the animations
         self.import_assets()
@@ -62,6 +63,11 @@ class Character(pygame.sprite.Sprite):
         self.talking_with_npc = False
         self.equip_weapon = False  # Boolean to check if character has equiped pistol or not
         self.attack_bool = False  # Boolean to check if character is attacking or not
+
+        # Weapon Variable
+        self.weapons = ['pistol','shotgun','smg']
+        self.equipped = 'pistol'
+        self.equipnum = 0
 
     def import_assets(self):
         # Imports character animations from sprite sheets
@@ -174,15 +180,20 @@ class Character(pygame.sprite.Sprite):
                 if event.type == pygame.KEYDOWN:
                     if event.key == KEY_WEAPON:
                         self.equip_weapon = not self.equip_weapon
-                # Check for user clicking mouse and equipped weapon
+                    if event.key == KEY_SWAP:   # Checks for weapon swap button press
+                        self.equipnum += 1  # Increments equip number
+                        self.equipped = self.weapons[self.equipnum % 3] # Switches equipped weapon
                 if event.type == pygame.MOUSEBUTTONDOWN and self.equip_weapon:
-                    if event.button == KEY_SHOOT:   # Check if mouse event is left click
-                        mousex, mousey = pygame.mouse.get_pos()  # Gets mouse position
-                        self.shoot(mousex, mousey)  # Shoots bullet
-                if event.type == pygame.KEYDOWN:  # Check for user attacking
-                    if event.key == KEY_ATTACK:  # Check if space key is pressed
-                        self.attack_bool = True  # Set attack boolean to true
-                        self.attack()  # Call attack function
+                    mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
+                    if self.equipped == 'pistol':
+                        self.shoot(mousex, mousey, 'pistol') # Shoots bullet
+                    if self.equipped == 'shotgun':
+                        self.shoot(mousex, mousey, 'shotgun') # Shoots bullet
+            # Check for user clicking mouse and equipped weapon
+            if pygame.mouse.get_pressed()[0] and self.equip_weapon and self.equipped == 'smg':
+                        if pygame.time.get_ticks() % 50 == 0: # limits fire rate
+                            mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
+                            self.shoot(mousex, mousey, 'smg') # Shoots bullet
 
             # Adjust speed based on sprinting state
             if self.sprinting:
@@ -212,13 +223,17 @@ class Character(pygame.sprite.Sprite):
 
         # Horizontal movement
         self.pos.x += self.direction.x * self.speed * dt
-        # Round the value before updating
-        self.rect.centerx = round(self.pos.x)
+        self.rect.centerx = round(self.pos.x)  # Round the value before updating
+        if self.rect.collidelist(self.walls) != -1:#undo movement if collide with a wall
+            self.pos.x -= self.direction.x * self.speed * dt
+            self.rect.centerx = round(self.pos.x)
 
         # Vertical movement
         self.pos.y += self.direction.y * self.speed * dt
-        # Round the value before updating
-        self.rect.centery = round(self.pos.y)
+        self.rect.centery = round(self.pos.y)  # Round the value before updating
+        if self.rect.collidelist(self.walls) != -1: #undo the movement if collide with a wall
+            self.pos.y -= self.direction.y * self.speed * dt
+            self.rect.centery = round(self.pos.y)
 
     def draw_stamina_bar(self, display_surface, dt):
         if self.sprinting_bool:  # If sprinting, degenerate stamina
@@ -306,15 +321,23 @@ class Character(pygame.sprite.Sprite):
         pygame.draw.rect(display_surface, (255, 0, 0), (self.health_bar_x, (
             self.health_bar_y + 30), self.current_health_width, self.health_bar_height))
 
-    def shoot(self, mousex, mousey):
-        camera_offset = self.camera_group.offset  # Get the camera offset
-        world_mouse_pos = pygame.math.Vector2(
-            mousex, mousey) + camera_offset  # Get the world mouse position
-        direction = world_mouse_pos - self.pos  # Get the direction vector
-        normalized_direction = direction.normalize()  # Normalize the direction vector
-        bullet_velocity = normalized_direction * 500  # Set the velocity of the bullet
-        Projectile(self.pos, bullet_velocity,
-                   self.groups()[0])  # Create a bullet
+    def shoot(self, mousex, mousey, type):
+        camera_offset = self.camera_group.offset # Get the camera offset
+        world_mouse_pos = pygame.math.Vector2(mousex, mousey) + camera_offset # Get the world mouse position
+        if type == 'pistol' or type == 'smg':
+            direction = world_mouse_pos - self.pos # Get the direction vector
+            normalized_direction = direction.normalize() # Normalize the direction vector
+            bullet_velocity = normalized_direction * 500 # Set the velocity of the bullet
+            Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a bullet
+        elif type == 'shotgun':
+            direction = world_mouse_pos - self.pos
+            normalized_direction = direction.normalize()
+            for pellet in range(5): # Fires 5 pellets
+                 randx = normalized_direction[0] + (random.randint(-25,25)/ 100) # randomizes direction of pellet
+                 randy = normalized_direction[1] + (random.randint(-25,25)/ 100)
+                 bullet_velocity = pygame.math.Vector2(randx, randy) * 500
+                 Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a pellet
+                 
 
     def update(self, dt):
         self.input()  # Get input from the user

@@ -11,8 +11,6 @@ License: MIT License
 
 # Imports
 import pygame
-import sys
-import inspect
 from settings import *
 
 class CreditsMenu:
@@ -27,7 +25,7 @@ class CreditsMenu:
 
         self.authors = ["Seth Daniels", "Nico Gatapia", "Jacob Horton", "Elijah Toliver", "Gilbert Vandegrift"]
         self.assets = ["Apocalypse Asset Pack", "- cuddleebug"]
-        self.consultants = ["Evan M. Powell - TA"]
+        self.consultants = ["Evan M. Powell - GTA"]
 
         self.mainmenu_button = pygame.image.load("./assets/main_menu/mainmenu_button.png") # Load exit button png
         self.highlighted_mainmenu = pygame.image.load("./assets/main_menu/mainmenu_button_highlighted.png") # Load highlighted exit button
