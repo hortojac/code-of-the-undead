@@ -12,6 +12,8 @@ License: MIT License
 # Imports
 from typing import List, Optional
 import pygame
+import json
+import datetime
 from pygame.rect import Rect
 from pygame.surface import Surface
 from settings import *
@@ -21,8 +23,9 @@ from npc import NPC
 from sprites import Generic
 from projectile import Projectile
 
-class Map:
-    def __init__(self):
+class Map():
+    def __init__(self, save_name):
+        self.save_name = save_name
         self.display_surface = pygame.display.get_surface()
         self.all_sprites = CameraGroup()
 
@@ -39,6 +42,7 @@ class Map:
         self.zombies = []  # List to hold all zombies
 
         self.setup()
+        self.load_game_save(self.save_name)
 
     def setup(self):
         background = pygame.image.load('./assets/Test_map/eaton_g_outline.png').convert_alpha()
@@ -58,6 +62,109 @@ class Map:
             zombie = Zombie(zombie_position, self.all_sprites, self.character, self.npc, self.display_surface)
             self.zombies.append(zombie)
 
+    def load_game_save(self, save_name):
+        save_path = f"./Game_Saves/{save_name}.json"
+
+        # Load the JSON data from the file
+        with open(save_path, 'r') as json_file:
+            save_data = json.load(json_file)
+
+        # Check if the loaded data is for the character
+        if 'character' in save_data:
+            character_data = save_data['character']
+            if 'pos' in character_data:
+                # Set the character's position based on the loaded data
+                self.character.pos.x = character_data['pos']['x']
+                self.character.pos.y = character_data['pos']['y']
+            if 'health' in character_data:
+                # Set the character's health based on the loaded data
+                self.character.health = character_data['health']
+            if 'stamina' in character_data:
+                # Set the character's stamina based on the loaded data
+                self.character.stamina = character_data['stamina']
+
+        # Check if the loaded data is for the NPC
+        if 'npc' in save_data:
+            npc_data = save_data['npc']
+            if 'pos' in npc_data:
+                # Set the npc's position based on the loaded data
+                self.npc.pos.x = npc_data['pos']['x']
+                self.npc.pos.y = npc_data['pos']['y']
+            if 'health' in npc_data:
+                # Set the npc's health based on the loaded data
+                self.npc.health = npc_data['health']
+            if 'stamina' in npc_data:
+                # Set the npc's stamina based on the loaded data
+                self.npc.stamina = npc_data['stamina']
+
+        # Check if the loaded data is for zombies
+        if 'zombies' in save_data:
+            zombie_data_list = save_data['zombies']
+            for i, zombie_data in enumerate(zombie_data_list):
+                if i < len(self.zombies):
+                    zombie = self.zombies[i]
+                    if 'pos' in zombie_data:
+                        # Set the zombie's position based on the loaded data
+                        zombie.pos.x = zombie_data['pos']['x']
+                        zombie.pos.y = zombie_data['pos']['y']
+                    if 'health' in zombie_data:
+                        # Set the zombie's health based on the loaded data
+                        zombie.health = zombie_data['health']
+
+    def write_game_save(self, save_name):
+        save_path = f"./Game_Saves/{save_name}.json"
+
+        # Create a dictionary to store the save data
+        save_data = {}
+
+        # Add the date to the save data
+        save_data['saveDate'] = {
+            "year": datetime.datetime.now().year,
+            "month": datetime.datetime.now().month,
+            "day": datetime.datetime.now().day,
+            "hour": datetime.datetime.now().hour,
+            "minute": datetime.datetime.now().minute
+        }
+
+        # Add the character's data to the save data
+        save_data['character'] = {
+            'pos': {
+                'x': self.character.pos.x,
+                'y': self.character.pos.y
+            },
+            'health': self.character.health,
+            'stamina': self.character.stamina
+        }
+
+        # Add the NPC's data to the save data
+        save_data['npc'] = {
+            'pos': {
+                'x': self.npc.pos.x,
+                'y': self.npc.pos.y
+            },
+            'health': self.npc.health,
+            'stamina': self.npc.stamina
+        }
+
+        # Create a list to store zombie data
+        zombie_data_list = []
+        for zombie in self.zombies:
+            zombie_data = {
+                'pos': {
+                    'x': zombie.pos.x,
+                    'y': zombie.pos.y
+                },
+                'health': zombie.health,
+            }
+            zombie_data_list.append(zombie_data)
+
+        # Add the zombie data list to the save data
+        save_data['zombies'] = zombie_data_list
+
+        # Save the JSON data to the file
+        with open(save_path, 'w') as json_file:
+            json.dump(save_data, json_file, indent=4)
+    
     def run(self, dt):
         # Fill the display surface with a background color (white)
         self.display_surface.fill('white')
