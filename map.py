@@ -35,14 +35,23 @@ class Map:
         self.cursor_time = pygame.time.get_ticks()
         self.text_box_active = False
 
+        self.walls = []#list to hold walls
         self.zombies = []  # List to hold all zombies
 
         self.setup()
 
     def setup(self):
-        Generic(pos=(0, 0), surf=pygame.image.load(
-            './assets/Test_map/map.png').convert_alpha(), groups=self.all_sprites, z=LAYERS['background'])
-        self.character = Character(((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)), self.all_sprites)
+        background = pygame.image.load('./assets/Test_map/eaton_g_outline.png').convert_alpha()
+        Generic(pos=(0, 0), surf=background, groups=self.all_sprites, z=LAYERS['background'])
+        
+        ###Create the Collisions for the map - will want to move this to the corresponding map level
+        for x in range(0, 1200):#loop through every pixel of outline
+            for y in range(0, 800):
+                color = background.get_at((x, y))#gets the color of the current pixel
+                if (color[0] == 0 and color[1] == 0 and color [2] == 0):#if the pixel is black
+                    self.walls.append(pygame.Rect(x, y, 1, 1))#add a rect for that pixel in the walls list
+
+        self.character = Character(((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)), self.all_sprites, self.walls)
         self.npc = NPC(((SCREEN_WIDTH // 2 + 100), (SCREEN_HEIGHT // 2 + 200)), self.all_sprites)
         for i in range(2):
             zombie_position = (i * 500, 0)
