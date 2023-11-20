@@ -130,24 +130,25 @@ class NPC(pygame.sprite.Sprite):
         direction = self.character.pos - self.pos
         distance_to_character = direction.length()
 
-        if not self.is_shooting:  # Only follow character if not currently shooting
-            if distance_to_character > self.max_distance:
-                self.direction = direction.normalize()  # Normalize the direction
-                self.speed = self.sprinting_speed if self.sprinting_bool and self.stamina > 0 else self.walking_speed
-                
-                # Set status based on direction
-                if abs(self.direction.x) > abs(self.direction.y):
-                    self.status = 'right' if self.direction.x > 0 else 'left'
+        if not self.death_bool: # If npc is dead, stop moving
+            if not self.is_shooting:  # Only follow character if not currently shooting
+                if distance_to_character > self.max_distance:
+                    self.direction = direction.normalize()  # Normalize the direction
+                    self.speed = self.sprinting_speed if self.sprinting_bool and self.stamina > 0 else self.walking_speed
+                    
+                    # Set status based on direction
+                    if abs(self.direction.x) > abs(self.direction.y):
+                        self.status = 'right' if self.direction.x > 0 else 'left'
+                    else:
+                        self.status = 'down' if self.direction.y > 0 else 'up'
+                    
+                    # Apply movement
+                    self.pos += self.direction * self.speed * dt
+                    self.rect.center = round(self.pos.x), round(self.pos.y)
                 else:
-                    self.status = 'down' if self.direction.y > 0 else 'up'
-                
-                # Apply movement
-                self.pos += self.direction * self.speed * dt
-                self.rect.center = round(self.pos.x), round(self.pos.y)
+                    self.speed = 0  # Stop moving if within the max distance
             else:
-                self.speed = 0  # Stop moving if within the max distance
-        else:
-            self.speed = 0  # Stop moving if shooting
+                self.speed = 0  # Stop moving if shooting
 
     def get_status(self):
         if self.direction.magnitude() == 0:
