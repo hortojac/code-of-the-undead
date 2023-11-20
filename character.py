@@ -178,22 +178,25 @@ class Character(pygame.sprite.Sprite):
             for event in pygame.event.get():
                 # Check for user equiping weapon
                 if event.type == pygame.KEYDOWN:
+                    if event.key == KEY_ATTACK:
+                        self.attack_bool = True
                     if event.key == KEY_WEAPON:
                         self.equip_weapon = not self.equip_weapon
                     if event.key == KEY_SWAP:   # Checks for weapon swap button press
                         self.equipnum += 1  # Increments equip number
-                        self.equipped = self.weapons[self.equipnum % 3] # Switches equipped weapon
+                        # Switches equipped weapon
+                        self.equipped = self.weapons[self.equipnum % 3]
                 if event.type == pygame.MOUSEBUTTONDOWN and self.equip_weapon:
-                    mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
+                    mousex, mousey = pygame.mouse.get_pos()  # Gets mouse position
                     if self.equipped == 'pistol':
-                        self.shoot(mousex, mousey, 'pistol') # Shoots bullet
+                        self.shoot(mousex, mousey, 'pistol')  # Shoots bullet
                     if self.equipped == 'shotgun':
-                        self.shoot(mousex, mousey, 'shotgun') # Shoots bullet
+                        self.shoot(mousex, mousey, 'shotgun')  # Shoots bullet
             # Check for user clicking mouse and equipped weapon
             if pygame.mouse.get_pressed()[0] and self.equip_weapon and self.equipped == 'smg':
-                        if pygame.time.get_ticks() % 50 == 0: # limits fire rate
-                            mousex, mousey = pygame.mouse.get_pos() # Gets mouse position
-                            self.shoot(mousex, mousey, 'smg') # Shoots bullet
+                if pygame.time.get_ticks() % 50 == 0:  # limits fire rate
+                    mousex, mousey = pygame.mouse.get_pos()  # Gets mouse position
+                    self.shoot(mousex, mousey, 'smg')  # Shoots bullet
 
             # Adjust speed based on sprinting state
             if self.sprinting:
