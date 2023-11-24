@@ -191,6 +191,9 @@ class NPC(pygame.sprite.Sprite):
             if self.stamina >= self.max_stamina: # If stamina is greater than or equal to max stamina, set stamina to max stamina
                 self.stamina = self.max_stamina # Set stamina to max stamina
 
+    def is_alive(self):
+        return not self.death_bool
+
     def shoot(self, target_x, target_y): #FIXME: Shooting a bullet doesn't get drawn on the screen right now
         print("NPC is shooting")
         print(target_x, target_y)
@@ -240,6 +243,7 @@ class NPC(pygame.sprite.Sprite):
                 self.is_shooting = True # Set is_shooting to true
 
     def update(self, dt):
+        self.is_alive() # Check if npc is alive
         self.get_status()  # Update the status (animation)
         self.animate(dt)  # Animate the NPC
         self.check_health(dt) # Check health

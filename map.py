@@ -170,19 +170,17 @@ class Map():
         # Fill the display surface with a background color (white)
         self.display_surface.fill('white')
         # Check collision between character and each living zombie
-        collision_with_character = any(zombie.is_alive(
-        ) and self.character.rect.colliderect(zombie.rect) for zombie in self.zombies)
+        collision_with_character = any(zombie.is_alive() and self.character.rect.colliderect(zombie.rect) for zombie in self.zombies)
         self.character.health_bool = not collision_with_character
         # Check collision between npc and each living zombie
-        collision_with_npc = any(zombie.is_alive() and self.npc.rect.colliderect(
-            zombie.rect) for zombie in self.zombies)
+        collision_with_npc = any(zombie.is_alive() and self.npc.rect.colliderect(zombie.rect) for zombie in self.zombies)
         self.npc.health_bool = not collision_with_npc
 
         # Check if living zombies are attacking the character or NPC
         for zombie in self.zombies:
             if zombie.is_alive():
-                zombie.attack_bool = self.character.rect.colliderect(
-                    zombie.rect) or self.npc.rect.colliderect(zombie.rect)
+                zombie.attack_bool = self.character.rect.colliderect(zombie.rect) if self.character.is_alive() else False
+                zombie.attack_bool = self.npc.rect.colliderect(zombie.rect) if self.npc.is_alive() else False
 
         # Check collision between bullet and each zombie
         for bullet in self.all_sprites.sprites():

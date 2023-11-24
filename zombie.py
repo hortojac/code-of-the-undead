@@ -111,9 +111,9 @@ class Zombie(pygame.sprite.Sprite):
         distance_to_npc = (self.npc.pos - self.pos).length()
         # Compare the distances
         if distance_to_character < distance_to_npc:
-            target_pos = self.character.pos
+            target_pos = self.character.pos if self.character.is_alive() else self.npc.pos
         else:
-            target_pos = self.npc.pos
+            target_pos = self.npc.pos if self.npc.is_alive() else self.character.pos
         # Calculate the distance to the target
         distance_to_target = (target_pos - self.pos).length()
         # Only follow if within 256 units

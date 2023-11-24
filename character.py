@@ -340,9 +340,12 @@ class Character(pygame.sprite.Sprite):
                  randy = normalized_direction[1] + (random.randint(-25,25)/ 100)
                  bullet_velocity = pygame.math.Vector2(randx, randy) * 500
                  Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a pellet
-                 
 
+    def is_alive(self):
+        return not self.death_bool
+                 
     def update(self, dt):
+        self.is_alive() # Check if character is alive
         self.input()  # Get input from the user
         self.move(dt)  # Move the character
         self.get_status()  # Get the status of the character
