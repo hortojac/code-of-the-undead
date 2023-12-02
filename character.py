@@ -69,6 +69,9 @@ class Character(pygame.sprite.Sprite):
         self.equipped = 'pistol'
         self.equipnum = 0
 
+        self.pistol_gunshot_sound = pygame.mixer.Sound('./assets/sounds/p226_gunshot.mp3')  # Load the pistol gunshot sound
+        self.twelve_gauge_sound = pygame.mixer.Sound('./assets/sounds/12_gauge_shotgun.mp3')  # Load the shotgun gunshot sound
+
     def import_assets(self):
         # Imports character animations from sprite sheets
         self.animations = {
@@ -332,14 +335,16 @@ class Character(pygame.sprite.Sprite):
             normalized_direction = direction.normalize() # Normalize the direction vector
             bullet_velocity = normalized_direction * 500 # Set the velocity of the bullet
             Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a bullet
+            self.pistol_gunshot_sound.play()  # Play the pistol gunshot sound
         elif type == 'shotgun':
             direction = world_mouse_pos - self.pos
             normalized_direction = direction.normalize()
             for pellet in range(5): # Fires 5 pellets
-                 randx = normalized_direction[0] + (random.randint(-25,25)/ 100) # randomizes direction of pellet
-                 randy = normalized_direction[1] + (random.randint(-25,25)/ 100)
-                 bullet_velocity = pygame.math.Vector2(randx, randy) * 500
-                 Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a pellet
+                randx = normalized_direction[0] + (random.randint(-25,25)/ 100) # randomizes direction of pellet
+                randy = normalized_direction[1] + (random.randint(-25,25)/ 100)
+                bullet_velocity = pygame.math.Vector2(randx, randy) * 500
+                Projectile(self.pos, bullet_velocity, self.groups()[0]) # Create a pellet
+            self.twelve_gauge_sound.play() # Play the shotgun gunshot sound
 
     def is_alive(self):
         return not self.death_bool
