@@ -24,6 +24,10 @@ class Game:
     def __init__(self):
         # Initialize the game, and create resources.
         pygame.init()
+        # Initialize the mixer
+        pygame.mixer.init()
+        # Load and play the menu music
+        self.load_and_play_music('./assets/Reborn - Main Menu.mp3')
         # Create a icon instance
         self.programIcon = pygame.image.load('assets/icon.png')
         # Set the program icon
@@ -48,6 +52,12 @@ class Game:
         self.save_name = ""
         # Boolean to check if the map has been loaded
         self.map_has_been_loaded = False
+
+    def load_and_play_music(self, music_file):
+        # Load the music file
+        pygame.mixer.music.load(music_file)
+        # Play the music, -1 for looping indefinitely
+        pygame.mixer.music.play(-1)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -95,10 +105,15 @@ class Game:
 
     def run_game(self):
         # Start the main loop for the game.
+        music_playing = True  # Flag to control music state
         while True:
             self.handle_events()
 
             dt = self.clock.tick() / 1000.0
+
+            if not music_playing:
+                    self.load_and_play_music('./assets/Reborn - Main Menu.mp3')
+                    music_playing = True
 
             if self.game_state == "Main Menu":
                 self.draw_main_menu()
@@ -109,6 +124,10 @@ class Game:
             elif self.game_state == "Game Saves Menu":
                 self.draw_game_saves_menu()
             elif self.game_state == "Play":
+                if music_playing:
+                    # Stop the music when transitioning to the game
+                    pygame.mixer.music.stop()
+                    music_playing = False
                 if self.map_has_been_loaded == False:
                     self.map = Map(self.save_name)
                     self.map_has_been_loaded = True

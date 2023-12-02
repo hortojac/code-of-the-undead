@@ -24,7 +24,7 @@ class CreditsMenu:
         self.author_font = pygame.font.Font(PIXEL_FONT_PATH, 24)
 
         self.authors = ["Seth Daniels", "Nico Gatapia", "Jacob Horton", "Elijah Toliver", "Gilbert Vandegrift"]
-        self.assets = ["Apocalypse Asset Pack", "- cuddleebug"]
+        self.assets = ["Apocalypse Asset Pack", "- cuddleebug", "Reborn - Main Menu Music", "- ErikMMusic"]
         self.consultants = ["Evan M. Powell - GTA"]
 
         self.mainmenu_button = pygame.image.load("./assets/main_menu/mainmenu_button.png") # Load exit button png
