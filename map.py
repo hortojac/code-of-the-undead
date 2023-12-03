@@ -185,10 +185,14 @@ class Map():
         # Check collision between bullet and each zombie
         for bullet in self.all_sprites.sprites():
             if isinstance(bullet, Projectile):
+                for wall in self.walls:
+                    if bullet.rect.colliderect(wall):
+                        bullet.kill()  # Remove the bullet if it collides with a wall
                 for zombie in self.zombies:
                     if zombie.is_alive() and zombie.rect.colliderect(bullet.rect):
                         zombie.kill_zombie(2)
                         bullet.kill()
+
         # Check collision between melee and zombie
         for melee in self.all_sprites.sprites():
             if isinstance(melee, AttackSprite):
