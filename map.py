@@ -83,6 +83,9 @@ class Map():
             if 'stamina' in character_data:
                 # Set the character's stamina based on the loaded data
                 self.character.stamina = character_data['stamina']
+            if 'Dead' in character_data and character_data['Dead']:
+                # If the character is marked as dead, kill the character
+                self.character.kill()
 
         # Check if the loaded data is for the NPC
         if 'npc' in save_data:
@@ -97,6 +100,9 @@ class Map():
             if 'stamina' in npc_data:
                 # Set the npc's stamina based on the loaded data
                 self.npc.stamina = npc_data['stamina']
+            if 'Dead' in npc_data and npc_data['Dead']:
+                # If the npc is marked as dead, kill the npc
+                self.npc.kill()
 
         # Check if the loaded data is for zombies
         if 'zombies' in save_data:
@@ -111,6 +117,9 @@ class Map():
                     if 'health' in zombie_data:
                         # Set the zombie's health based on the loaded data
                         zombie.health = zombie_data['health']
+                    if 'Dead' in zombie_data and zombie_data['Dead']:
+                        # If the zombie is marked as dead, kill the zombie
+                        zombie.kill()
 
     def write_game_save(self, save_name):
         save_path = f"./Game_Saves/{save_name}.json"
@@ -134,7 +143,8 @@ class Map():
                 'y': self.character.pos.y
             },
             'health': self.character.health,
-            'stamina': self.character.stamina
+            'stamina': self.character.stamina,
+            'Dead': not self.character.is_alive()
         }
 
         # Add the NPC's data to the save data
@@ -144,7 +154,8 @@ class Map():
                 'y': self.npc.pos.y
             },
             'health': self.npc.health,
-            'stamina': self.npc.stamina
+            'stamina': self.npc.stamina,
+            'Dead': not self.npc.is_alive()
         }
 
         # Create a list to store zombie data
@@ -156,6 +167,7 @@ class Map():
                     'y': zombie.pos.y
                 },
                 'health': zombie.health,
+                'Dead': not zombie.is_alive()
             }
             zombie_data_list.append(zombie_data)
 
