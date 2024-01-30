@@ -186,7 +186,6 @@ class Character(pygame.sprite.Sprite):
             #     self.equipped = self.weapons[self.equipnum % 3]
             if(events != None):
             # Event Loop
-                print("Event LOOP")
                 for event in events:
                     # Check for user equiping weapon
                     if event.type == pygame.KEYDOWN:
