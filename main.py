@@ -60,7 +60,8 @@ class Game:
         pygame.mixer.music.play(-1)
 
     def handle_events(self):
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             # Check for quit events
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -71,6 +72,7 @@ class Game:
                     sys.exit()
                 elif event.key == pygame.K_ESCAPE:
                     self.game_state = "Pause Menu"
+        return events
 
     def draw_main_menu(self):
         # Draw the menu
@@ -88,9 +90,9 @@ class Game:
         # Draw the game saves menu
         self.game_state, self.save_name = self.game_saves_menu.run()
 
-    def draw_map(self, dt):
+    def draw_map(self, dt, events):
         # Draw the map
-        self.map.run(dt)
+        self.map.run(dt, events)
   
     def draw_pause_menu(self):
         # Draw the pause menu
@@ -106,7 +108,7 @@ class Game:
     def run_game(self):
         # Start the main loop for the game.
         while True:
-            self.handle_events()
+            events = self.handle_events()
 
             dt = self.clock.tick() / 1000.0
             # Unpause the music
@@ -126,7 +128,7 @@ class Game:
                 if self.map_has_been_loaded == False:
                     self.map = Map(self.save_name)
                     self.map_has_been_loaded = True
-                self.draw_map(dt)
+                self.draw_map(dt, events)
             elif self.game_state == "Pause Menu":
                 self.draw_pause_menu()
             elif self.game_state == "Quit":

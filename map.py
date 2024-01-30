@@ -178,7 +178,7 @@ class Map():
         with open(save_path, 'w') as json_file:
             json.dump(save_data, json_file, indent=4)
     
-    def run(self, dt):
+    def run(self, dt, events):
         # Fill the display surface with a background color (white)
         self.display_surface.fill('white')
         # Check collision between character and each living zombie
@@ -218,6 +218,7 @@ class Map():
         self.character.draw_health_bar(self.display_surface, dt) # Draw health bar
         self.npc.update_game_state(self.character, self.zombies) # update game state for NPC
         self.all_sprites.update(dt) # update all sprites
+        self.character.input(events)#send the inputs to character -- need to include pygame game events
         
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):

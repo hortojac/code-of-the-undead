@@ -156,7 +156,7 @@ class Character(pygame.sprite.Sprite):
             # Create the AttackSprite with an offset from the character's position
             AttackSprite(self.pos + offset, self.groups()[0])
 
-    def input(self):
+    def input(self, events):
         self.direction = pygame.math.Vector2(0, 0)
         # Check for keys that are continuously pressed
         keys = pygame.key.get_pressed()
@@ -177,24 +177,35 @@ class Character(pygame.sprite.Sprite):
                 self.direction.y = 1
                 self.status = 'down'
 
+            # if keys[KEY_ATTACK]:
+            #     self.attack_bool = True
+            # if keys[KEY_WEAPON]:
+            #     self.equip_weapon = not self.equip_weapon
+            # if keys[KEY_SWAP]:
+            #     self.equipnum += 1
+            #     self.equipped = self.weapons[self.equipnum % 3]
+            if(events != None):
             # Event Loop
-            for event in pygame.event.get():
-                # Check for user equiping weapon
-                if event.type == pygame.KEYDOWN:
-                    if event.key == KEY_ATTACK:
-                        self.attack_bool = True
-                    if event.key == KEY_WEAPON:
-                        self.equip_weapon = not self.equip_weapon
-                    if event.key == KEY_SWAP:   # Checks for weapon swap button press
-                        self.equipnum += 1  # Increments equip number
-                        # Switches equipped weapon
-                        self.equipped = self.weapons[self.equipnum % 3]
-                if event.type == pygame.MOUSEBUTTONDOWN and self.equip_weapon:
-                    mousex, mousey = pygame.mouse.get_pos()  # Gets mouse position
-                    if self.equipped == 'pistol':
-                        self.shoot(mousex, mousey, 'pistol')  # Shoots bullet
-                    if self.equipped == 'shotgun':
-                        self.shoot(mousex, mousey, 'shotgun')  # Shoots bullet
+                print("Event LOOP")
+                for event in events:
+                    # Check for user equiping weapon
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == KEY_ATTACK:
+                            self.attack_bool = True
+                        if event.key == KEY_WEAPON:
+                            self.equip_weapon = not self.equip_weapon
+                        if event.key == KEY_SWAP:   # Checks for weapon swap button press
+                            self.equipnum += 1  # Increments equip number
+                            # Switches equipped weapon
+                            self.equipped = self.weapons[self.equipnum % 3]
+                        elif event.key == pygame.K_e:
+                            print("e")
+                    if event.type == pygame.MOUSEBUTTONDOWN and self.equip_weapon:
+                        mousex, mousey = pygame.mouse.get_pos()  # Gets mouse position
+                        if self.equipped == 'pistol':
+                            self.shoot(mousex, mousey, 'pistol')  # Shoots bullet
+                        if self.equipped == 'shotgun':
+                            self.shoot(mousex, mousey, 'shotgun')  # Shoots bullet
             # Check for user clicking mouse and equipped weapon
             if pygame.mouse.get_pressed()[0] and self.equip_weapon and self.equipped == 'smg':
                 if pygame.time.get_ticks() % 50 == 0:  # limits fire rate
@@ -351,7 +362,7 @@ class Character(pygame.sprite.Sprite):
                  
     def update(self, dt):
         self.is_alive() # Check if character is alive
-        self.input()  # Get input from the user
+        # self.input()  # Get input from the user
         self.move(dt)  # Move the character
         self.get_status()  # Get the status of the character
         self.animate(dt)  # Animate the character
